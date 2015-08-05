@@ -12,6 +12,9 @@ trait Predicate[P, T] extends Serializable { self =>
   /** Checks if `t` satisfies the predicate `P`. */
   def isValid(t: T): Boolean
 
+  // TODO: Find a better name and make this abstract.
+  def value: P = null.asInstanceOf[P]
+
   /** Returns a string representation of this [[Predicate]] using `t`. */
   def show(t: T): String
 
@@ -69,6 +72,15 @@ object Predicate {
       def show(t: T): String = showF(t)
       override val isConstant: Boolean = constant
     }
+
+  def instance2[P, T](isValidF: T => Boolean, valueV: P, showF: T => String, constant: Boolean = false): Predicate[P, T] =
+    new Predicate[P, T] {
+      def isValid(t: T): Boolean = isValidF(t)
+      override def value: P = valueV
+      def show(t: T): String = showF(t)
+      override val isConstant: Boolean = constant
+    }
+
 
   /** Constructs a constant [[Predicate]] from its parameters. */
   def constant[P, T](isValidV: Boolean, showV: String): Predicate[P, T] =

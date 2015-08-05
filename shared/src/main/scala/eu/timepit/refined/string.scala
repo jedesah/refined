@@ -16,7 +16,7 @@ object string extends StringPredicates with StringInferenceRules {
   case class Regex()
 
   /** Predicate that checks if a `String` starts with the prefix `S`. */
-  case class StartsWith[S]()
+  case class StartsWith[S](s: S)
 
   /** Predicate that checks if a `String` is a valid URI. */
   case class Uri()
@@ -37,16 +37,16 @@ object string extends StringPredicates with StringInferenceRules {
 private[refined] trait StringPredicates {
 
   implicit def endsWithPredicate[R <: String](implicit wr: Witness.Aux[R]): Predicate[EndsWith[R], String] =
-    Predicate.instance(_.endsWith(wr.value), t => s""""$t".endsWith("${wr.value}")""")
+    Predicate.instance2(_.endsWith(wr.value), EndsWith(wr.value), t => s""""$t".endsWith("${wr.value}")""")
 
   implicit def matchesRegexPredicate[R <: String](implicit wr: Witness.Aux[R]): Predicate[MatchesRegex[R], String] =
-    Predicate.instance(_.matches(wr.value), t => s""""$t".matches("${wr.value}")""")
+    Predicate.instance2(_.matches(wr.value), MatchesRegex(wr.value), t => s""""$t".matches("${wr.value}")""")
 
   implicit def regexPredicate: Predicate[Regex, String] =
     Predicate.fromPartial(new scala.util.matching.Regex(_), "Regex")
 
   implicit def startsWithPredicate[R <: String](implicit wr: Witness.Aux[R]): Predicate[StartsWith[R], String] =
-    Predicate.instance(_.startsWith(wr.value), t => s""""$t".startsWith("${wr.value}")""")
+    Predicate.instance2(_.startsWith(wr.value), StartsWith(wr.value), t => s""""$t".startsWith("${wr.value}")""")
 
   implicit def uriPredicate: Predicate[Uri, String] =
     Predicate.fromPartial(new java.net.URI(_), "Uri")

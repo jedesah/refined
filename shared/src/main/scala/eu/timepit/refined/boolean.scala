@@ -45,6 +45,7 @@ private[refined] trait BooleanPredicates {
   implicit def notPredicate[P, T](implicit p: Predicate[P, T]): Predicate[Not[P], T] =
     new Predicate[Not[P], T] {
       def isValid(t: T): Boolean = !p.isValid(t)
+      override def value: Not[P] = Not(p.value)
       def show(t: T): String = s"!${p.show(t)}"
 
       override def validate(t: T): Option[String] =
@@ -59,8 +60,11 @@ private[refined] trait BooleanPredicates {
   implicit def andPredicate[A, B, T](implicit pa: Predicate[A, T], pb: Predicate[B, T]): Predicate[A And B, T] =
     new Predicate[A And B, T] {
       def isValid(t: T): Boolean = pa.isValid(t) && pb.isValid(t)
+      override def value: And[A, B] = And(pa.value, pb.value)
       def show(t: T): String = s"(${pa.show(t)} && ${pb.show(t)})"
 
+      // Fixme: Do we want "And[A, B] | A | B" as return type here?
+      // This requires a common type for And, A, and B
       override def validate(t: T): Option[String] =
         (pa.validate(t), pb.validate(t)) match {
           case (Some(sl), Some(sr)) =>

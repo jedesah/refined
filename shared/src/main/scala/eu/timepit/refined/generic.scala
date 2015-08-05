@@ -28,7 +28,7 @@ object generic extends GenericPredicates with GenericInferenceRules {
 private[refined] trait GenericPredicates {
 
   implicit def equalPredicate[T, U <: T](implicit wu: Witness.Aux[U]): Predicate[Equal[U], T] =
-    Predicate.instance(_ == wu.value, t => s"($t == ${wu.value})")
+    Predicate.instance2(_ == wu.value, Equal(wu.value), t => s"($t == ${wu.value})")
 
   implicit def ctorNamesPredicate[T, P, R0 <: Coproduct, R1 <: HList, K <: HList](
     implicit

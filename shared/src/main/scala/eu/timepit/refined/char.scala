@@ -27,17 +27,17 @@ object char extends CharPredicates {
 private[refined] trait CharPredicates {
 
   implicit def digitPredicate: Predicate[Digit, Char] =
-    Predicate.instance(_.isDigit, t => s"isDigit('$t')")
+    Predicate.instance2(_.isDigit, Digit(), t => s"isDigit('$t')")
 
   implicit def letterPredicate: Predicate[Letter, Char] =
-    Predicate.instance(_.isLetter, t => s"isLetter('$t')")
+    Predicate.instance2(_.isLetter, Letter(), t => s"isLetter('$t')")
 
   implicit def lowerCasePredicate: Predicate[LowerCase, Char] =
-    Predicate.instance(_.isLower, t => s"isLower('$t')")
+    Predicate.instance2(_.isLower, LowerCase(), t => s"isLower('$t')")
 
   implicit def upperCasePredicate: Predicate[UpperCase, Char] =
-    Predicate.instance(_.isUpper, t => s"isUpper('$t')")
+    Predicate.instance2(_.isUpper, UpperCase(), t => s"isUpper('$t')")
 
   implicit def whitespacePredicate: Predicate[Whitespace, Char] =
-    Predicate.instance(_.isWhitespace, t => s"isWhitespace('$t')")
+    Predicate.instance2(_.isWhitespace, Whitespace(), t => s"isWhitespace('$t')")
 }

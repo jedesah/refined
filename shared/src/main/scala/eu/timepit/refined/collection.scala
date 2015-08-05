@@ -82,6 +82,7 @@ private[refined] trait CollectionPredicates {
   implicit def countPredicate[PA, PC, A, T](implicit pa: Predicate[PA, A], pc: Predicate[PC, Int], ev: T => TraversableOnce[A]): Predicate[Count[PA, PC], T] =
     new Predicate[Count[PA, PC], T] {
       def isValid(t: T): Boolean = pc.isValid(count(t))
+      override def value: Count[PA, PC] = Count(pa.value, pc.value)
       def show(t: T): String = pc.show(count(t))
 
       override def validate(t: T): Option[String] = {
@@ -94,11 +95,12 @@ private[refined] trait CollectionPredicates {
     }
 
   implicit def emptyPredicate[T](implicit ev: T => TraversableOnce[_]): Predicate[Empty, T] =
-    Predicate.instance(_.isEmpty, t => s"isEmpty($t)")
+    Predicate.instance2(_.isEmpty, Empty(), t => s"isEmpty($t)")
 
   implicit def forallPredicate[P, A, T[A] <: TraversableOnce[A]](implicit p: Predicate[P, A]): Predicate[Forall[P], T[A]] =
-    Predicate.instance(
+    Predicate.instance2(
       _.forall(p.isValid),
+      Forall(p.value),
       _.toSeq.map(p.show).mkString("(", " && ", ")")
     )
 
@@ -137,6 +139,7 @@ private[refined] trait CollectionPredicates {
   implicit def sizePredicate[P, T](implicit p: Predicate[P, Int], ev: T => TraversableOnce[_]): Predicate[Size[P], T] =
     new Predicate[Size[P], T] {
       def isValid(t: T): Boolean = p.isValid(t.size)
+      override def value: Size[P] = Size(p.value)
       def show(t: T): String = p.show(t.size)
 
       override def validate(t: T): Option[String] = {

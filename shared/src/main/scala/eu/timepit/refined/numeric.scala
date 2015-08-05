@@ -60,17 +60,20 @@ object numeric extends NumericPredicates with NumericInferenceRules {
 private[refined] trait NumericPredicates {
 
   implicit def lessPredicate[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Predicate[Less[N], T] =
-    Predicate.instance(t => nt.lt(t, wn.value), t => s"($t < ${wn.value})")
+    Predicate.instance2(t => nt.lt(t, wn.value), Less(wn.value), t => s"($t < ${wn.value})")
 
   implicit def greaterPredicate[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Predicate[Greater[N], T] =
-    Predicate.instance(t => nt.gt(t, wn.value), t => s"($t > ${wn.value})")
+    Predicate.instance2(t => nt.gt(t, wn.value), Greater(wn.value), t => s"($t > ${wn.value})")
 
+  // FIXME: We don't have value of type N
   implicit def lessPredicateNat[N <: Nat, T](implicit tn: ToInt[N], nt: Numeric[T]): Predicate[Less[N], T] =
     Predicate.instance(t => nt.toDouble(t) < tn.apply(), t => s"($t < ${tn.apply()})")
 
+  // FIXME: We don't have value of type N
   implicit def greaterPredicateNat[N <: Nat, T](implicit tn: ToInt[N], nt: Numeric[T]): Predicate[Greater[N], T] =
     Predicate.instance(t => nt.toDouble(t) > tn.apply(), t => s"($t > ${tn.apply()})")
 
+  // FIXME: We don't have value of type N
   implicit def equalPredicateNat[N <: Nat, T](implicit tn: ToInt[N], it: Integral[T]): Predicate[Equal[N], T] =
     Predicate.instance(t => it.equiv(t, it.fromInt(tn.apply())), t => s"($t == ${tn.apply()})")
 }

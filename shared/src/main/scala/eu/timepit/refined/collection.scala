@@ -14,40 +14,40 @@ object collection extends CollectionPredicates with CollectionInferenceRules {
    * which satisfy the predicate `PA` and passes the result to the numeric
    * predicate `PC`.
    */
-  trait Count[PA, PC]
+  case class Count[PA, PC](pa: PA, pc: PC)
 
   /** Predicate that checks if a `TraversableOnce` is empty. */
-  trait Empty
+  case class Empty()
 
   /**
    * Predicate that checks if the predicate `P` holds for all elements of a
    * `TraversableOnce`.
    */
-  trait Forall[P]
+  case class Forall[P](p: P)
 
   /**
    * Predicate that checks if the predicate `P` holds for the first element
    * of a `Traversable`.
    */
-  trait Head[P]
+  case class Head[P](p: P)
 
   /**
    * Predicate that checks if the predicate `P` holds for the element at
    * index `N` of a sequence.
    */
-  trait Index[N, P]
+  case class Index[N, P](n: N, p: P)
 
   /**
    * Predicate that checks if the predicate `P` holds for the last element
    * of a `Traversable`.
    */
-  trait Last[P]
+  case class Last[P](p: P)
 
   /**
    * Predicate that checks if the size of a `TraversableOnce` satisfies the
    * predicate `P`.
    */
-  trait Size[P]
+  case class Size[P](p: P)
 
   /**
    * Predicate that checks if a `TraversableOnce` contains a value

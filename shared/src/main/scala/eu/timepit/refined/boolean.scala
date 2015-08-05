@@ -7,31 +7,31 @@ import shapeless.{::, HList, HNil}
 object boolean extends BooleanPredicates with BooleanInferenceRules0 {
 
   /** Constant predicate that is always `true`. */
-  trait True
+  case class True()
 
   /** Constant predicate that is always `false`. */
-  trait False
+  case class False()
 
   /** Negation of the predicate `P`. */
-  trait Not[P]
+  case class Not[P](p: P)
 
   /** Conjunction of the predicates `A` and `B`. */
-  trait And[A, B]
+  case class And[A, B](a: A, b: B)
 
   /** Disjunction of the predicates `A` and `B`. */
-  trait Or[A, B]
+  case class Or[A, B](a: A, b: B)
 
   /** Exclusive disjunction of the predicates `A` and `B`. */
-  trait Xor[A, B]
+  case class Xor[A, B](a: A, b: B)
 
   /** Conjunction of all predicates in `PS`. */
-  trait AllOf[PS]
+  case class AllOf[PS](ps: PS)
 
   /** Disjunction of all predicates in `PS`. */
-  trait AnyOf[PS]
+  case class AnyOf[PS](ps: PS)
 
   /** Exclusive disjunction of all predicates in `PS`. */
-  trait OneOf[PS]
+  case class OneOf[PS](ps: PS)
 }
 
 private[refined] trait BooleanPredicates {

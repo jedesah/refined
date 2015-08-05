@@ -10,19 +10,19 @@ import shapeless.{Coproduct, HList, LabelledGeneric, Witness}
 object generic extends GenericPredicates with GenericInferenceRules {
 
   /** Predicate that checks if a value is equal to `U`. */
-  trait Equal[U]
+  case class Equal[U](u: U)
 
   /** Predicate that checks if the constructor names of a sum type satisfy `P`. */
-  trait ConstructorNames[P]
+  case class ConstructorNames[P](p: P)
 
   /** Predicate that checks if the field names of a product type satisfy `P`. */
-  trait FieldNames[P]
+  case class FieldNames[P](p: P)
 
   /** Predicate that witnesses that the type of a value is a subtype of `U`. */
-  trait Subtype[U]
+  case class Subtype[U]()
 
   /** Predicate that witnesses that the type of a value is a supertype of `U`. */
-  trait Supertype[U]
+  case class Supertype[U]()
 }
 
 private[refined] trait GenericPredicates {

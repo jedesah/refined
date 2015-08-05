@@ -30,10 +30,10 @@ import shapeless.{Nat, Witness}
 object numeric extends NumericPredicates with NumericInferenceRules {
 
   /** Predicate that checks if a numeric value is less than `N`. */
-  trait Less[N]
+  case class Less[N](n: N)
 
   /** Predicate that checks if a numeric value is greater than `N`. */
-  trait Greater[N]
+  case class Greater[N](n: N)
 
   /** Predicate that checks if a numeric value is less than or equal to `N`. */
   type LessEqual[N] = Not[Greater[N]]

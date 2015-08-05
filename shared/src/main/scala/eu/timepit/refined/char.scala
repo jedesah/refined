@@ -6,19 +6,19 @@ import eu.timepit.refined.char._
 object char extends CharPredicates {
 
   /** Predicate that checks if a `Char` is a digit. */
-  trait Digit
+  case class Digit()
 
   /** Predicate that checks if a `Char` is a letter. */
-  trait Letter
+  case class Letter()
 
   /** Predicate that checks if a `Char` is a lower case character. */
-  trait LowerCase
+  case class LowerCase()
 
   /** Predicate that checks if a `Char` is an upper case character. */
-  trait UpperCase
+  case class UpperCase()
 
   /** Predicate that checks if a `Char` is white space. */
-  trait Whitespace
+  case class Whitespace()
 
   /** Predicate that checks if a `Char` is a letter or digit. */
   type LetterOrDigit = Letter Or Digit

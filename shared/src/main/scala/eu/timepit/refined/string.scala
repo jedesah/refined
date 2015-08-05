@@ -7,31 +7,31 @@ import shapeless.Witness
 object string extends StringPredicates with StringInferenceRules {
 
   /** Predicate that checks if a `String` ends with the suffix `S`. */
-  trait EndsWith[S]
+  case class EndsWith[S](s: S)
 
   /** Predicate that checks if a `String` matches the regular expression `R`. */
-  trait MatchesRegex[R]
+  case class MatchesRegex[R](r: R)
 
   /** Predicate that checks if a `String` is a valid regular expression. */
-  trait Regex
+  case class Regex()
 
   /** Predicate that checks if a `String` starts with the prefix `S`. */
-  trait StartsWith[S]
+  case class StartsWith[S]()
 
   /** Predicate that checks if a `String` is a valid URI. */
-  trait Uri
+  case class Uri()
 
   /** Predicate that checks if a `String` is a valid URL. */
-  trait Url
+  case class Url()
 
   /** Predicate that checks if a `String` is a valid UUID. */
-  trait Uuid
+  case class Uuid()
 
   /** Predicate that checks if a `String` is valid XML. */
-  trait Xml
+  case class Xml()
 
   /** Predicate that checks if a `String` is a valid XPath expression. */
-  trait XPath
+  case class XPath()
 }
 
 private[refined] trait StringPredicates {

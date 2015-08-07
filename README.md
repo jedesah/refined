@@ -141,21 +141,21 @@ provides syntax for singleton types.
 
 ## Installation
 
-The latest version of the library is 0.2.0, which is available for Scala and
+The latest version of the library is 0.2.1, which is available for Scala and
 [Scala.js][scala.js] version 2.11.
 
 If you're using SBT, add the following to your build:
 
-    libraryDependencies += "eu.timepit" %% "refined" % "0.2.0"
+    libraryDependencies += "eu.timepit" %% "refined" % "0.2.1"
 
 Or for Scala.js:
 
-    libraryDependencies += "eu.timepit" %%% "refined" % "0.2.0"
+    libraryDependencies += "eu.timepit" %%% "refined" % "0.2.1"
 
 Instructions for Maven and other build tools are available at [search.maven.org][search.maven].
 
 Release notes for the latest version are available in
-[0.2.0.markdown](https://github.com/fthomas/refined/blob/master/notes/0.2.0.markdown).
+[0.2.1.markdown](https://github.com/fthomas/refined/blob/master/notes/0.2.1.markdown).
 
 ## Documentation
 
@@ -288,6 +288,7 @@ The library comes with these predefined predicates:
 
 ## Contributors
 
+* [Frank S. Thomas](https://github.com/fthomas) ([@fst9000](https://twitter.com/fst9000))
 * Your name here :-)
 
 ## Projects using refined
@@ -296,6 +297,9 @@ If you have a project that uses the library to enforce more static guarantees
 and you'd like to include in this list, please open a pull request or mention
 it in the Gitter channel and we'll add a link to it here.
 
+* [argonaut-shapeless](https://github.com/alexarchambault/argonaut-shapeless) -
+  provides the argonaut-refined module for (de)serialization of refined types
+  from and to JSON
 * Your project here :-)
 
 ## Related projects

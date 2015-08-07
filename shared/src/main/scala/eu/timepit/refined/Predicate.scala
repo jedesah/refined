@@ -25,6 +25,9 @@ trait Predicate[P, T] extends Serializable { self =>
   def validate(t: T): Option[String] =
     if (isValid(t)) None else Some(s"Predicate failed: ${show(t)}.")
 
+  def validate2[P1](t: T) =
+    if (isValid(t)) Passed(value) else Failed(value)
+
   /**
    * Denotes whether this [[Predicate]] is constant (which is false by
    * default). A constant [[Predicate]] ignores the argument passed to

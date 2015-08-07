@@ -85,7 +85,7 @@ lazy val compileSettings = Seq(
   ),
 
   wartremoverErrors in (Compile, compile) ++= Warts.unsafe diff
-    Seq(Wart.Any, Wart.DefaultArguments, Wart.AsInstanceOf, Wart.NonUnitStatements, Wart.Null, Wart.Throw)
+    Seq(Wart.Any, Wart.DefaultArguments, Wart.AsInstanceOf, Wart.IsInstanceOf, Wart.NonUnitStatements, Wart.Null, Wart.Throw)
 )
 
 lazy val scaladocSettings = Seq(

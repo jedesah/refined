@@ -3,6 +3,7 @@ package eu.timepit.refined
 import eu.timepit.refined.InferenceRule.==>
 import eu.timepit.refined.boolean._
 import eu.timepit.refined.generic.Equal
+import eu.timepit.refined.internal.NatToValue
 import eu.timepit.refined.numeric._
 import shapeless.nat._
 import shapeless.ops.nat.ToInt
@@ -65,9 +66,8 @@ private[refined] trait NumericPredicates {
   implicit def greaterPredicate[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Predicate[Greater[N], T] =
     Predicate.instance2(t => nt.gt(t, wn.value), Greater(wn.value), t => s"($t > ${wn.value})")
 
-  // FIXME: We don't have value of type N
-  implicit def lessPredicateNat[N <: Nat, T](implicit tn: ToInt[N], nt: Numeric[T]): Predicate[Less[N], T] =
-    Predicate.instance(t => nt.toDouble(t) < tn(), t => s"($t < ${tn()})")
+  implicit def lessPredicateNat[N <: Nat, T](implicit tn: NatToValue[N], nt: Numeric[T]): Predicate[Less[N], T] =
+    Predicate.instance2(t => nt.toDouble(t) < tn.toInt, Less(tn.toNat), t => s"($t < ${tn.toInt})")
 
   // FIXME: We don't have value of type N
   implicit def greaterPredicateNat[N <: Nat, T](implicit tn: ToInt[N], nt: Numeric[T]): Predicate[Greater[N], T] =

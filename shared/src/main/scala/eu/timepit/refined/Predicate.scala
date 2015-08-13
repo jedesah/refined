@@ -25,7 +25,7 @@ trait Predicate[P, T] extends Serializable { self =>
   def validate(t: T): Option[String] =
     if (isValid(t)) None else Some(s"Predicate failed: ${show(t)}.")
 
-  def validate2[P1](t: T) =
+  def validate2(t: T): Result[P] =
     if (isValid(t)) Passed(value) else Failed(value)
 
   /**

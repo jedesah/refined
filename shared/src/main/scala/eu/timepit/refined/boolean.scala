@@ -76,10 +76,10 @@ private[refined] trait BooleanPredicates {
           case _ => None
         }
 
-      override def validate2(t: T): Result[And[Result[A], Result[B]]] =
+      override def validate2(t: T): Result[And[A, B]] =
         (pa.validate2(t), pb.validate2(t)) match {
-          case (a: Passed[A], b: Passed[B]) => Passed(And(a, b))
-          case (a, b) => Failed(And(a, b))
+          case (Passed(a), Passed(b)) => Passed(And(a, b))
+          case (a, b) => Failed(And(a.a, b.a))
         }
 
       override val isConstant: Boolean = pa.isConstant && pb.isConstant

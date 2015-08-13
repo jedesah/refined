@@ -69,11 +69,9 @@ private[refined] trait NumericPredicates {
   implicit def lessPredicateNat[N <: Nat, T](implicit tn: NatToValue[N], nt: Numeric[T]): Predicate[Less[N], T] =
     Predicate.instance2(t => nt.toDouble(t) < tn.toInt, Less(tn.toNat), t => s"($t < ${tn.toInt})")
 
-  // FIXME: We don't have value of type N
   implicit def greaterPredicateNat[N <: Nat, T](implicit tn: ToInt[N], nt: Numeric[T]): Predicate[Greater[N], T] =
     Predicate.instance(t => nt.toDouble(t) > tn(), t => s"($t > ${tn()})")
 
-  // FIXME: We don't have value of type N
   implicit def equalPredicateNat[N <: Nat, T](implicit tn: ToInt[N], it: Integral[T]): Predicate[Equal[N], T] =
     Predicate.instance(t => it.equiv(t, it.fromInt(tn())), t => s"($t == ${tn()})")
 }

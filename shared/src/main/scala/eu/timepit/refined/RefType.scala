@@ -69,7 +69,8 @@ trait RefType[F[_, _]] extends Serializable {
     new RefineMAux
 
   def mapRefine[T, P, U](tp: F[T, P])(f: T => U)(implicit p: Predicate[P, U]): Either[String, F[U, P]] =
-    refine(f(unwrap(tp)))
+    ???
+    //refine(f(unwrap(tp)))
 }
 
 object RefType {

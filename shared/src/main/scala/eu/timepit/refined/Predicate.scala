@@ -9,6 +9,8 @@ import scala.util.{ Failure, Success, Try }
  */
 trait Predicate[P, T] extends Serializable { self =>
 
+  type Out
+
   /** Checks if `t` satisfies the predicate `P`. */
   def isValid(t: T): Boolean
 
@@ -25,8 +27,8 @@ trait Predicate[P, T] extends Serializable { self =>
   def validate(t: T): Option[String] =
     if (isValid(t)) None else Some(s"Predicate failed: ${show(t)}.")
 
-  def validate2(t: T): Result[P] =
-    if (isValid(t)) Passed(value) else Failed(value)
+  def validate2(t: T): Out =
+    if (isValid(t)) Passed(value).asInstanceOf[Out] else Failed(value).asInstanceOf[Out]
 
   /**
    * Denotes whether this [[Predicate]] is constant (which is false by
@@ -66,6 +68,8 @@ trait Predicate[P, T] extends Serializable { self =>
 
 object Predicate {
 
+  type Aux[P, T, Out1] = Predicate[P, T] { type Out = Out1 }
+
   def apply[P, T](implicit p: Predicate[P, T]): Predicate[P, T] = p
 
   /** Constructs a [[Predicate]] from its parameters. */
@@ -83,7 +87,6 @@ object Predicate {
       def show(t: T): String = showF(t)
       override val isConstant: Boolean = constant
     }
-
 
   /** Constructs a constant [[Predicate]] from its parameters. */
   def constant[P, T](isValidV: Boolean, showV: String): Predicate[P, T] =

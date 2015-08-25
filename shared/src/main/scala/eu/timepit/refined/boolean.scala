@@ -36,12 +36,28 @@ object boolean extends BooleanPredicates with BooleanInferenceRules0 {
 
 private[refined] trait BooleanPredicates {
 
-  implicit def truePredicate[T]: Predicate[True, T] =
-    Predicate.alwaysValid
+  implicit def truePredicate[T]: Predicate.Aux[True, T, Result[True]] =
+    new Predicate[True, T] {
+      override type Out = Result[True]
 
-  implicit def falsePredicate[T]: Predicate[False, T] =
-    Predicate.alwaysInvalid
+      override def isValid(t: T): Boolean = true
 
+      override def show(t: T): String = "true"
+
+      override def value: True = True()
+    }
+
+  implicit def falsePredicate[T]: Predicate.Aux[False, T, Result[False]] =
+    new Predicate[False, T] {
+      override type Out = Result[False]
+
+      override def isValid(t: T): Boolean = false
+
+      override def show(t: T): String = "false"
+
+      override def value: False = False()
+    }
+  
   implicit def notPredicate[P, T](implicit p: Predicate[P, T]): Predicate[Not[P], T] =
     new Predicate[Not[P], T] {
       def isValid(t: T): Boolean = !p.isValid(t)
@@ -57,7 +73,7 @@ private[refined] trait BooleanPredicates {
       override val isConstant: Boolean = p.isConstant
     }
 
-  implicit def andPredicate[A, B, T](implicit pa: Predicate[A, T], pb: Predicate[B, T]): Predicate[A And B, T] =
+  implicit def andPredicate[A, B, T, AOut, BOut](implicit pa: Predicate.Aux[A, T, AOut], pb: Predicate.Aux[B, T, BOut]): Predicate.Aux[A And B, T, Result[And[AOut, BOut]]] =
     new Predicate[A And B, T] {
       def isValid(t: T): Boolean = pa.isValid(t) && pb.isValid(t)
       override def value: And[A, B] = And(pa.value, pb.value)
@@ -76,10 +92,12 @@ private[refined] trait BooleanPredicates {
           case _ => None
         }
 
-      override def validate2(t: T): Result[And[A, B]] =
+      type Out = Result[And[AOut, BOut]]
+
+      override def validate2(t: T): Result[And[AOut, BOut]] =
         (pa.validate2(t), pb.validate2(t)) match {
-          case (Passed(a), Passed(b)) => Passed(And(a, b))
-          case (a, b) => Failed(And(a.a, b.a))
+          case (a @ Passed(_), b: Passed[_]) => Passed(And(pa.validate2(t), pb.validate2(t)))
+          case (a, b) => Failed(And(a, b))
         }
 
       override val isConstant: Boolean = pa.isConstant && pb.isConstant

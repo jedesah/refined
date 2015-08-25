@@ -40,7 +40,9 @@ scala> refineT[Positive](-5)
 res2: Either[String, Int @@ Positive] = Left(Predicate failed: (-5 > 0).)
 ```
 
-Note that `@@` is [shapeless'][shapeless] type for tagging types.
+Note that `@@` is [shapeless'][shapeless] type for tagging types which has
+the nice property of being a subtype of its first type parameter (i.e.
+`(T @@ P) <: T`).
 
 *refined* also contains inference rules for converting between different
 refined types. For example, `Int @@ Greater[_10]` can be safely converted
@@ -141,21 +143,21 @@ provides syntax for singleton types.
 
 ## Installation
 
-The latest version of the library is 0.2.1, which is available for Scala and
+The latest version of the library is 0.2.2, which is available for Scala and
 [Scala.js][scala.js] version 2.11.
 
 If you're using SBT, add the following to your build:
 
-    libraryDependencies += "eu.timepit" %% "refined" % "0.2.1"
+    libraryDependencies += "eu.timepit" %% "refined" % "0.2.2"
 
 Or for Scala.js:
 
-    libraryDependencies += "eu.timepit" %%% "refined" % "0.2.1"
+    libraryDependencies += "eu.timepit" %%% "refined" % "0.2.2"
 
 Instructions for Maven and other build tools are available at [search.maven.org][search.maven].
 
 Release notes for the latest version are available in
-[0.2.1.markdown](https://github.com/fthomas/refined/blob/master/notes/0.2.1.markdown).
+[0.2.2.markdown](https://github.com/fthomas/refined/blob/master/notes/0.2.2.markdown).
 
 ## Documentation
 
@@ -307,8 +309,10 @@ it in the Gitter channel and we'll add a link to it here.
 
 ## Related projects
 
-This library is inspired by the [refined][refined.hs] library for Haskell.
-It even stole its name! Another Scala library that provides type-level
+The most advanced system using refinement types is probably
+[LiquidHaskell][liquid-haskell] which uses an SMT solver to infer refinements
+automatically. This library was inspired by the [refined][refined.hs] Haskell
+library. It even stole its name! Another Scala library that provides type-level
 validations is [bond][bond].
 
 ## License
@@ -318,6 +322,7 @@ and also in the [LICENSE](https://github.com/fthomas/refined/blob/master/LICENSE
 
 [bond]: https://github.com/fwbrasil/bond
 [code-of-conduct]: http://typelevel.org/conduct.html
+[liquid-haskell]: http://goto.ucsd.edu/~rjhala/liquid/haskell/blog/about/
 [refined.hs]: http://nikita-volkov.github.io/refined
 [scala.js]: http://www.scala-js.org
 [search.maven]: http://search.maven.org/#search|ga|1|eu.timepit.refined

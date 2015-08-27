@@ -15,4 +15,10 @@ final class RefineAux[F[_, _], P](rt: RefType[F]) {
       case Passed(_) => Right(rt.unsafeWrap(t))
       case _ => Left(p.validate2(t))
     }
+
+  def apply2[T, POut](t: T)(implicit p: Predicate.Aux[P, T, POut], s: Show[POut]): Either[String, F[T, P]] =
+    p.validate2(t) match {
+      case Passed(_) => Right(rt.unsafeWrap(t))
+      case _ => Left(s.show(p.validate2(t)))
+    }
 }

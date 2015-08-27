@@ -47,6 +47,13 @@ private[refined] trait BooleanPredicates {
       override def value: True = True()
     }
 
+
+  implicit val trueShow: Show[True] =
+    new Show[True] {
+      def show(a: True): String = "true"
+    }
+
+
   implicit def falsePredicate[T]: Predicate.Aux[False, T, Result[False]] =
     new Predicate[False, T] {
       override type Out = Result[False]

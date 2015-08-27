@@ -27,6 +27,7 @@ object generic extends GenericPredicates with GenericInferenceRules {
 
 private[refined] trait GenericPredicates {
 
+  /*
   implicit def equalPredicate[T, U <: T](implicit wu: Witness.Aux[U]): Predicate[Equal[U], T] =
     Predicate.instance2(_ == wu.value, Equal(wu.value), t => s"($t == ${wu.value})")
 
@@ -60,10 +61,11 @@ private[refined] trait GenericPredicates {
 
   implicit def supertypePredicate[T, U <: T]: Predicate[Supertype[U], T] =
     Predicate.alwaysValid
+    */
 }
 
 private[refined] trait GenericInferenceRules {
 
-  implicit def equalPredicateInference[T, U <: T, P](implicit p: Predicate[P, T], wu: Witness.Aux[U]): Equal[U] ==> P =
-    InferenceRule(p.isValid(wu.value), s"equalPredicateInference(${p.show(wu.value)})")
+  //implicit def equalPredicateInference[T, U <: T, P](implicit p: Predicate[P, T], wu: Witness.Aux[U]): Equal[U] ==> P =
+  //  InferenceRule(p.isValid(wu.value), s"equalPredicateInference(${p.show(wu.value)})")
 }

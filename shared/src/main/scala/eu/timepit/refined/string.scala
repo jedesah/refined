@@ -36,6 +36,7 @@ object string extends StringPredicates with StringInferenceRules {
 
 private[refined] trait StringPredicates {
 
+  /*
   implicit def endsWithPredicate[R <: String](implicit wr: Witness.Aux[R]): Predicate[EndsWith[R], String] =
     Predicate.instance2(_.endsWith(wr.value), EndsWith(wr.value), t => s""""$t".endsWith("${wr.value}")""")
 
@@ -62,6 +63,7 @@ private[refined] trait StringPredicates {
 
   implicit def xpathPredicate: Predicate[XPath, String] =
     Predicate.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, "XPath")
+    */
 }
 
 private[refined] trait StringInferenceRules {

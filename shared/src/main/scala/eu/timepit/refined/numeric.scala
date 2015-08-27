@@ -59,6 +59,7 @@ object numeric extends NumericPredicates with NumericInferenceRules {
 
 private[refined] trait NumericPredicates {
 
+  /*
   implicit def lessPredicate[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Predicate[Less[N], T] =
     Predicate.instance2(t => nt.lt(t, wn.value), Less(wn.value), t => s"($t < ${wn.value})")
 
@@ -73,6 +74,7 @@ private[refined] trait NumericPredicates {
 
   implicit def equalPredicateNat[N <: Nat, T](implicit tn: ToInt[N], nt: Numeric[T]): Predicate[Equal[N], T] =
     Predicate.instance(t => nt.toDouble(t) == tn(), t => s"($t == ${tn()})")
+    */
 }
 
 private[refined] trait NumericInferenceRules {
@@ -95,6 +97,6 @@ private[refined] trait NumericInferenceRules {
   implicit def greaterInferenceWitNat[C, A <: C, B <: Nat](implicit wa: Witness.Aux[A], tb: ToInt[B], nc: Numeric[C]): Greater[A] ==> Greater[B] =
     InferenceRule(nc.gt(wa.value, nc.fromInt(tb())), s"greaterInferenceWitNat(${wa.value}, ${tb()})")
 
-  implicit def equalPredicateInferenceNat[P, T, N <: Nat](implicit p: Predicate[P, T], nt: Numeric[T], tn: ToInt[N]): Equal[N] ==> P =
-    InferenceRule(p.isValid(nt.fromInt(tn())), s"equalPredicateInferenceNat(${p.show(nt.fromInt(tn()))})")
+  //implicit def equalPredicateInferenceNat[P, T, N <: Nat](implicit p: Predicate[P, T], nt: Numeric[T], tn: ToInt[N]): Equal[N] ==> P =
+  //  InferenceRule(p.isValid(nt.fromInt(tn())), s"equalPredicateInferenceNat(${p.show(nt.fromInt(tn()))})")
 }

@@ -34,11 +34,11 @@ object implicits {
    *
    * This is an implicit version of `[[refineMV]]`.
    */
-  implicit def autoRefineV[T, P](t: T)(
+  /*implicit def autoRefineV[T, P](t: T)(
     implicit
     p: Predicate[P, T], rt: RefType[Refined]
   ): Refined[T, P] = macro RefineMAux.macroImpl[Refined, T, P]
-
+*/
   /**
    * Implicitly tags (at compile-time) a value of type `T` with `P` if `t`
    * satisfies the predicate `P`. If it does not satisfy the predicate,
@@ -46,8 +46,9 @@ object implicits {
    *
    * This is an implicit version of `[[refineMT]]`.
    */
-  implicit def autoRefineT[T, P](t: T)(
+  /*implicit def autoRefineT[T, P](t: T)(
     implicit
     p: Predicate[P, T], rt: RefType[@@]
   ): T @@ P = macro RefineMAux.macroImpl[@@, T, P]
+  */
 }

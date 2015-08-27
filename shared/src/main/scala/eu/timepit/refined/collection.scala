@@ -79,6 +79,7 @@ object collection extends CollectionPredicates with CollectionInferenceRules {
 
 private[refined] trait CollectionPredicates {
 
+  /*
   implicit def countPredicate[PA, PC, A, T](implicit pa: Predicate[PA, A], pc: Predicate[PC, Int], ev: T => TraversableOnce[A]): Predicate[Count[PA, PC], T] =
     new Predicate[Count[PA, PC], T] {
       def isValid(t: T): Boolean = pc.isValid(count(t))
@@ -147,6 +148,7 @@ private[refined] trait CollectionPredicates {
         p.validate(s).map(msg => s"Predicate taking size($t) = $s failed: $msg")
       }
     }
+    */
 }
 
 private[refined] trait CollectionInferenceRules {

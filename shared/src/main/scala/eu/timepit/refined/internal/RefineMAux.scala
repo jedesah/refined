@@ -12,13 +12,13 @@ import scala.reflect.macros.blackbox
  */
 final class RefineMAux[F[_, _], P] {
 
-  def apply[T](t: T)(implicit p: Predicate[P, T], rt: RefType[F]): F[T, P] = macro RefineMAux.macroImpl[F, T, P]
+  def apply[T, O](t: T)(implicit p: Predicate[P, T, O], rt: RefType[F]): F[T, P] = macro RefineMAux.macroImpl[F, T, P, O]
 }
 
 object RefineMAux {
 
-  def macroImpl[F[_, _], T: c.WeakTypeTag, P: c.WeakTypeTag](c: blackbox.Context)(t: c.Expr[T])(
-    p: c.Expr[Predicate[P, T]], rt: c.Expr[RefType[F]]
+  def macroImpl[F[_, _], T: c.WeakTypeTag, P: c.WeakTypeTag, O](c: blackbox.Context)(t: c.Expr[T])(
+    p: c.Expr[Predicate[P, T, O]], rt: c.Expr[RefType[F]]
   ): c.Expr[F[T, P]] = {
     import c.universe._
 

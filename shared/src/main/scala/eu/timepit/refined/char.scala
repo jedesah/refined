@@ -26,6 +26,7 @@ object char extends CharPredicates {
 
 private[refined] trait CharPredicates {
 
+  /*
   implicit def digitPredicate: Predicate[Digit, Char] =
     Predicate.instance2(_.isDigit, Digit(), t => s"isDigit('$t')")
 
@@ -40,4 +41,5 @@ private[refined] trait CharPredicates {
 
   implicit def whitespacePredicate: Predicate[Whitespace, Char] =
     Predicate.instance2(_.isWhitespace, Whitespace(), t => s"isWhitespace('$t')")
+    */
 }

@@ -10,7 +10,7 @@ package internal
  */
 final class RefineAux[F[_, _], P](rt: RefType[F]) {
 
-  def apply[T, POut](t: T)(implicit p: Predicate.Aux[P, T, POut]): Either[POut, F[T, P]] =
+  def apply[T, POut](t: T)(implicit p: Predicate[P, T, POut]): Either[POut, F[T, P]] =
     p.validate2(t) match {
       case Passed(_) => Right(rt.unsafeWrap(t))
       case _ => Left(p.validate2(t))

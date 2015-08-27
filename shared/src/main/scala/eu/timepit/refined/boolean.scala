@@ -36,9 +36,8 @@ object boolean extends BooleanPredicates with BooleanInferenceRules0 {
 
 private[refined] trait BooleanPredicates {
 
-  implicit def truePredicate[T]: Predicate.Aux[True, T, Result[True]] =
-    new Predicate[True, T] {
-      override type Out = Result[True]
+  implicit def truePredicate[T]: Predicate[True, T, Result[True]] =
+    new Predicate[True, T, Result[True]] {
 
       override def isValid(t: T): Boolean = true
 
@@ -47,9 +46,8 @@ private[refined] trait BooleanPredicates {
       override def value: True = True()
     }
 
-  implicit def falsePredicate[T]: Predicate.Aux[False, T, Result[False]] =
-    new Predicate[False, T] {
-      override type Out = Result[False]
+  implicit def falsePredicate[T]: Predicate[False, T, Result[False]] =
+    new Predicate[False, T, Result[False]] {
 
       override def isValid(t: T): Boolean = false
 
@@ -57,9 +55,9 @@ private[refined] trait BooleanPredicates {
 
       override def value: False = False()
     }
-  
-  implicit def notPredicate[P, T](implicit p: Predicate[P, T]): Predicate[Not[P], T] =
-    new Predicate[Not[P], T] {
+
+  implicit def notPredicate[P, T, O](implicit p: Predicate[P, T, O]): Predicate[Not[P], T, Result[Not[O]]] =
+    new Predicate[Not[P], T, Result[Not[O]]] {
       def isValid(t: T): Boolean = !p.isValid(t)
       override def value: Not[P] = Not(p.value)
       def show(t: T): String = s"!${p.show(t)}"
@@ -73,8 +71,8 @@ private[refined] trait BooleanPredicates {
       override val isConstant: Boolean = p.isConstant
     }
 
-  implicit def andPredicate[A, B, T, AOut, BOut](implicit pa: Predicate.Aux[A, T, AOut], pb: Predicate.Aux[B, T, BOut]): Predicate.Aux[A And B, T, Result[And[AOut, BOut]]] =
-    new Predicate[A And B, T] {
+  implicit def andPredicate[A, B, T, AOut, BOut](implicit pa: Predicate[A, T, AOut], pb: Predicate[B, T, BOut]): Predicate[A And B, T, Result[And[AOut, BOut]]] =
+    new Predicate[A And B, T, Result[And[AOut, BOut]]] {
       def isValid(t: T): Boolean = pa.isValid(t) && pb.isValid(t)
       override def value: And[A, B] = And(pa.value, pb.value)
       def show(t: T): String = s"(${pa.show(t)} && ${pb.show(t)})"
@@ -92,8 +90,6 @@ private[refined] trait BooleanPredicates {
           case _ => None
         }
 
-      type Out = Result[And[AOut, BOut]]
-
       override def validate2(t: T): Result[And[AOut, BOut]] =
         (pa.validate2(t), pb.validate2(t)) match {
           case (a @ Passed(_), b: Passed[_]) => Passed(And(pa.validate2(t), pb.validate2(t)))
@@ -103,6 +99,7 @@ private[refined] trait BooleanPredicates {
       override val isConstant: Boolean = pa.isConstant && pb.isConstant
     }
 
+  /*
   implicit def orPredicate[A, B, T](implicit pa: Predicate[A, T], pb: Predicate[B, T]): Predicate[A Or B, T] =
     new Predicate[A Or B, T] {
       def isValid(t: T): Boolean = pa.isValid(t) || pb.isValid(t)
@@ -171,6 +168,7 @@ private[refined] trait BooleanPredicates {
       override def accumulateShow(t: T): List[String] =
         ph.show(t) :: pt.accumulateShow(t)
     }
+    */
 }
 
 private[refined] trait BooleanInferenceRules0 extends BooleanInferenceRules1 {

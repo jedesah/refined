@@ -9,23 +9,18 @@ import scala.util.{ Failure, Success, Try }
  */
 trait Predicate[P, T, Out] extends Serializable { self =>
 
-  //type Out
-
   /** Checks if `t` satisfies the predicate `P`. */
   def isValid(t: T): Boolean
 
   // TODO: Find a better name and make this abstract.
   def value: P = null.asInstanceOf[P]
 
-  /** Returns a string representation of this [[Predicate]] using `t`. */
-  def show(t: T): String
-
   /**
    * Returns `None` if `t` satisfies the predicate `P`, or an error message
    * contained in `Some` otherwise.
    */
   def validate(t: T): Option[String] =
-    if (isValid(t)) None else Some(s"Predicate failed: ${show(t)}.")
+    if (isValid(t)) None else Some(s"Predicate failed: .")
 
   def validate2(t: T): Out =
     if (isValid(t)) Passed(value).asInstanceOf[Out] else Failed(value).asInstanceOf[Out]
@@ -52,8 +47,9 @@ trait Predicate[P, T, Out] extends Serializable { self =>
    * Returns the result of [[show]] in a `List`. Can be overridden to
    * accumulate the string representations of sub-predicates.
    */
-  def accumulateShow(t: T): List[String] =
+  /*def accumulateShow(t: T): List[String] =
     List(show(t))
+*/
 
   /*
   private[refined] def contramap[U](f: U => T): Predicate[P, U] =

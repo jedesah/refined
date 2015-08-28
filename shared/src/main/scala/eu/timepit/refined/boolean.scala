@@ -41,8 +41,6 @@ private[refined] trait BooleanPredicates {
 
       override def isValid(t: T): Boolean = true
 
-      override def show(t: T): String = "true"
-
       override def value: True = True()
     }
 
@@ -51,12 +49,15 @@ private[refined] trait BooleanPredicates {
       def show(a: True): String = "true"
     }
 
+  implicit val falseShow: Show[False] =
+    new Show[False] {
+      def show(a: False): String = "false"
+    }
+
   implicit def falsePredicate[T]: Predicate[False, T, Result[False]] =
     new Predicate[False, T, Result[False]] {
 
       override def isValid(t: T): Boolean = false
-
-      override def show(t: T): String = "false"
 
       override def value: False = False()
     }
@@ -65,13 +66,14 @@ private[refined] trait BooleanPredicates {
     new Predicate[Not[P], T, Result[Not[O]]] {
       def isValid(t: T): Boolean = !p.isValid(t)
       override def value: Not[P] = Not(p.value)
-      def show(t: T): String = s"!${p.show(t)}"
+      //override def show(t: T): String = s"!${p.show(t)}"
 
+      /*
       override def validate(t: T): Option[String] =
         p.validate(t) match {
           case Some(_) => None
           case None => Some(s"Predicate ${p.show(t)} did not fail.")
-        }
+        }*/
 
       override val isConstant: Boolean = p.isConstant
     }
@@ -80,11 +82,11 @@ private[refined] trait BooleanPredicates {
     new Predicate[A And B, T, Result[And[AOut, BOut]]] {
       def isValid(t: T): Boolean = pa.isValid(t) && pb.isValid(t)
       override def value: And[A, B] = And(pa.value, pb.value)
-      def show(t: T): String = s"(${pa.show(t)} && ${pb.show(t)})"
+      //override def show(t: T): String = s"(${pa.show(t)} && ${pb.show(t)})"
 
       // Fixme: Do we want "And[A, B] | A | B" as return type here?
       // This requires a common type for And, A, and B
-      override def validate(t: T): Option[String] =
+      /*override def validate(t: T): Option[String] =
         (pa.validate(t), pb.validate(t)) match {
           case (Some(sl), Some(sr)) =>
             Some(s"Both predicates of ${show(t)} failed. Left: $sl Right: $sr")
@@ -93,7 +95,7 @@ private[refined] trait BooleanPredicates {
           case (None, Some(sr)) =>
             Some(s"Right predicate of ${show(t)} failed: $sr")
           case _ => None
-        }
+        }*/
 
       override def validate2(t: T): Result[And[AOut, BOut]] =
         (pa.validate2(t), pb.validate2(t)) match {

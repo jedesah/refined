@@ -147,4 +147,4 @@ class BooleanPredicateSpec extends Properties("BooleanPredicate") {
     p.contramap(identity[Char]).accumulateShow('c') ?= p.accumulateShow('c')
   }
 }
-*/
+*/ 

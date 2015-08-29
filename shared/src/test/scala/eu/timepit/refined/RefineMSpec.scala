@@ -12,7 +12,7 @@ import shapeless.tag.@@
 import shapeless.test.illTyped
 
 class RefineMSpec extends Properties("refineM") {
-/*
+  /*
   property("RefineMAux instance") = secure {
     val rv = refineMV[Digit]
     val rt = refineMT[Digit]

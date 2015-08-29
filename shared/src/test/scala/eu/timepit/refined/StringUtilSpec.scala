@@ -7,7 +7,7 @@ import org.scalacheck.Properties
 import shapeless.test.illTyped
 
 class StringUtilSpec extends Properties("util.string") {
-/*
+  /*
   property("uri success") = secure {
     uri("file:///dev/null") ?= new java.net.URI("file:///dev/null")
   }

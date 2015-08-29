@@ -1,6 +1,6 @@
 package eu.timepit.refined
 
-import eu.timepit.refined.char.{ Digit, LowerCase }
+import eu.timepit.refined.char.{Digit, LowerCase}
 import eu.timepit.refined.collection._
 import eu.timepit.refined.generic.Equal
 import eu.timepit.refined.numeric._
@@ -9,7 +9,7 @@ import org.scalacheck.Properties
 import shapeless.nat._
 
 class CollectionPredicateSpec extends Properties("CollectionPredicate") {
-/*
+  /*
   property("Contains[W.`0`.T].isValid") = forAll { (l: List[Int]) =>
     Predicate[Contains[W.`0`.T], List[Int]].isValid(l) ?= l.contains(0)
   }

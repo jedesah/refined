@@ -105,7 +105,7 @@ private[refined] trait CollectionValidators {
   ): Validator[T[A], Forall[P], Forall[List[v.Res]]] =
     Validator.instance(t => {
       val rt = t.toList.map(v.validate)
-      if (rt.forall(_.isPassed)) Passed(t, Forall(rt)) else Failed(t, Forall(rt))
+      Result.fromBoolean(rt.forall(_.isPassed), t, Forall(rt))
     })
 
   implicit def forallValidatorView[A, P, R, T](
@@ -114,36 +114,52 @@ private[refined] trait CollectionValidators {
   ): Validator[T, Forall[P], Forall[List[v.Res]]] =
     forallValidator.contramap(ev)
 
-  /*
-  implicit def headPredicate[P, A, T[A] <: Traversable[A]](implicit p: Predicate[P, A]): Predicate[Head[P], T[A]] =
-    singleElemPredicate(_.headOption, (t: T[A], a: A) => s"head($t) = $a")
+  implicit def headValidator[A, P, R, T[A] <: Traversable[A]](
+    implicit
+    v: Validator[A, P, R]
+  ): Validator[T[A], Head[P], Head[Option[v.Res]]] =
+    Validator.instance(t => t.headOption match {
+      case Some(a) =>
+        val rv = v.validate(a)
+        rv.mapBoth(_ => t, _ => Head(Some(rv)))
+      case None => Failed(t, Head(None))
+    })
 
-  implicit def headPredicateView[P, A, T](implicit p: Predicate[P, A], ev: T => Traversable[A]): Predicate[Head[P], T] =
-    headPredicate.contramap(ev)
+  implicit def headValidatorView[A, P, R, T](
+    implicit
+    v: Validator[A, P, R], ev: T => Traversable[A]
+  ): Validator[T, Head[P], Head[Option[v.Res]]] =
+    headValidator.contramap(ev)
 
-  implicit def indexPredicate[N <: Int, P, A, T](implicit p: Predicate[P, A], ev: T => PartialFunction[Int, A], wn: Witness.Aux[N]): Predicate[Index[N, P], T] =
-    singleElemPredicate(_.lift(wn.value), (t: T, a: A) => s"index($t, ${wn.value}) = $a")
+  implicit def indexValidator[A, P, R, T, N <: Int](
+    implicit
+    v: Validator[A, P, R],
+    ev: T => PartialFunction[Int, A],
+    wn: Witness.Aux[N]
+  ): Validator[T, Index[N, P], Index[N, Option[v.Res]]] =
+    Validator.instance(t => t.lift(wn.value) match {
+      case Some(a) =>
+        val rv = v.validate(a)
+        rv.mapBoth(_ => t, _ => Index(wn.value, Some(rv)))
+      case None => Failed(t, Index(wn.value, None))
+    })
 
-  implicit def lastPredicate[P, A, T[A] <: Traversable[A]](implicit p: Predicate[P, A]): Predicate[Last[P], T[A]] =
-    singleElemPredicate(_.lastOption, (t: T[A], a: A) => s"last($t) = $a")
+  implicit def lastValidator[A, P, R, T[A] <: Traversable[A]](
+    implicit
+    v: Validator[A, P, R]
+  ): Validator[T[A], Last[P], Last[Option[v.Res]]] =
+    Validator.instance(t => t.lastOption match {
+      case Some(a) =>
+        val rv = v.validate(a)
+        rv.mapBoth(_ => t, _ => Last(Some(rv)))
+      case None => Failed(t, Last(None))
+    })
 
-  implicit def lastPredicateView[P, A, T](implicit p: Predicate[P, A], ev: T => Traversable[A]): Predicate[Last[P], T] =
-    lastPredicate.contramap(ev)
-
-  private def singleElemPredicate[PA, PT, A, T](get: T => Option[A], describe: (T, A) => String)(implicit p: Predicate[PA, A]): Predicate[PT, T] =
-    new Predicate[PT, T] {
-      def isValid(t: T): Boolean = get(t).fold(false)(p.isValid)
-      def show(t: T): String = get(t).fold("no element")(p.show)
-
-      override def validate(t: T): Option[String] =
-        get(t) match {
-          case Some(a) =>
-            p.validate(a).map(msg => s"Predicate taking ${describe(t, a)} failed: $msg")
-          case None =>
-            Some("Predicate failed: empty collection.")
-        }
-    }
-*/
+  implicit def lastValidatorView[A, P, R, T](
+    implicit
+    v: Validator[A, P, R], ev: T => Traversable[A]
+  ): Validator[T, Last[P], Last[Option[v.Res]]] =
+    lastValidator.contramap(ev)
 
   implicit def sizeValidator[T, P, R](
     implicit

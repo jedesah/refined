@@ -37,7 +37,7 @@ object RefineMAux {
       case Passed(_, _) =>
         val refType = MacroUtils.eval(c)(rt)
         refType.unsafeWrapM(c)(t)
-      case rv => c.abort(c.enclosingPosition, rv.toString)
+      case rv => c.abort(c.enclosingPosition, rv.toString) // TODO: use Show
     }
   }
 }

@@ -27,3 +27,9 @@ sealed trait Result[T, P] extends Product with Serializable {
 
 case class Passed[T, P](value: T, predicate: P) extends Result[T, P]
 case class Failed[T, P](value: T, predicate: P) extends Result[T, P]
+
+object Result {
+
+  def fromBoolean[T, P](b: Boolean, t: T, p: P): Result[T, P] =
+    if (b) Passed(t, p) else Failed(t, p)
+}

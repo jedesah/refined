@@ -8,6 +8,7 @@ import shapeless.test.illTyped
 
 class GenericPredicateSpec extends Properties("GenericPredicate") {
 
+  /*
   property("Equal[_].isValid") = secure {
     Predicate[Equal[W.`1.4`.T], Double].isValid(1.4)
   }
@@ -79,4 +80,5 @@ class GenericPredicateSpec extends Properties("GenericPredicate") {
     illTyped("Predicate[Supertype[Seq[Int]], List[Int]]", ".*could not find implicit value.*")
     true
   }
+  */
 }

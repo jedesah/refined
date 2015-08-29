@@ -8,6 +8,7 @@ import shapeless.test.illTyped
 
 class StringUtilSpecJvm extends Properties("util.string") {
 
+  /*
   property("regex success") = secure {
     regex("(a|b)").toString ?= "(a|b)".r.toString
   }
@@ -44,4 +45,5 @@ class StringUtilSpecJvm extends Properties("util.string") {
     illTyped("""xpath("A//B/*[1")""", "(?s)XPath predicate failed.*")
     true
   }
+  */*/*/
 }

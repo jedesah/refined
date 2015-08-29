@@ -42,13 +42,13 @@ object numeric extends NumericValidators with NumericInferenceRules {
   type GreaterEqual[N] = Not[Less[N]]
 
   /** Predicate that checks if a numeric value is positive (> 0). */
-  type Positive = Greater[W.`0`.T]
+  type Positive = Greater[_0]
 
   /** Predicate that checks if a numeric value is zero or negative (<= 0). */
   type NonPositive = Not[Positive]
 
   /** Predicate that checks if a numeric value is negative (< 0). */
-  type Negative = Less[W.`0`.T]
+  type Negative = Less[_0]
 
   /** Predicate that checks if a numeric value is zero or positive (>= 0). */
   type NonNegative = Not[Negative]

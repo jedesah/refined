@@ -8,6 +8,7 @@ import shapeless.nat._
 
 class NumericPredicateSpec extends Properties("NumericPredicate") {
 
+  /*
   property("Less.isValid") = forAll { (d: Double) =>
     Predicate[Less[W.`1.0`.T], Double].isValid(d) ?= (d < 1.0)
   }
@@ -83,4 +84,5 @@ class NumericPredicateSpec extends Properties("NumericPredicate") {
   property("Equal.Nat ~= Equal") = forAll { (i: Int) =>
     Predicate[Equal[_1], Int].validate(i) ?= Predicate[Equal[W.`1`.T], Int].validate(i)
   }
+  */
 }

@@ -1,6 +1,6 @@
 package eu.timepit.refined
 
-import eu.timepit.refined.boolean.{ False, Not }
+import eu.timepit.refined.boolean.{False, Not}
 import eu.timepit.refined.char._
 import eu.timepit.refined.collection._
 import eu.timepit.refined.numeric._
@@ -12,7 +12,7 @@ import shapeless.tag.@@
 import shapeless.test.illTyped
 
 class RefineMSpec extends Properties("refineM") {
-
+/*
   property("RefineMAux instance") = secure {
     val rv = refineMV[Digit]
     val rt = refineMT[Digit]
@@ -87,4 +87,5 @@ class RefineMSpec extends Properties("refineM") {
     illTyped("refineMT[NonEmpty](List(1, 2, 3))", "compile-time refinement.*")
     true
   }
+  */
 }

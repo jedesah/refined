@@ -9,6 +9,7 @@ import shapeless.test.illTyped
 
 class RefineSyntaxSpec extends Properties("refine syntax") {
 
+  /*
   def testRefineV(arg: Either[String, Int Refined Positive]): Boolean = true
   def testRefineT(arg: Either[String, Int @@ Positive]): Boolean = true
   def testRefineMV(arg: Int Refined Positive): Boolean = true
@@ -86,4 +87,5 @@ class RefineSyntaxSpec extends Properties("refine syntax") {
     illTyped("val z: PositiveInt = -5", "(?s)type mismatch.*")
     true
   }
+  */
 }

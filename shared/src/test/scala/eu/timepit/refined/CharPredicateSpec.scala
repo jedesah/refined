@@ -6,6 +6,7 @@ import org.scalacheck.Properties
 
 class CharPredicateSpec extends Properties("CharPredicate") {
 
+  /*
   property("Digit.isValid") = forAll { (c: Char) =>
     Predicate[Digit, Char].isValid(c) ?= c.isDigit
   }
@@ -29,4 +30,5 @@ class CharPredicateSpec extends Properties("CharPredicate") {
   property("UpperCase.show") = secure {
     Predicate[UpperCase, Char].show('c') ?= "isUpper('c')"
   }
+  */
 }

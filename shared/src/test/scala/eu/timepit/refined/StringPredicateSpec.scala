@@ -11,6 +11,7 @@ import shapeless.nat._
 
 class StringPredicateSpec extends Properties("StringPredicate") {
 
+  /*
   property("Empty.isValid") = forAll { (s: String) =>
     Predicate[Empty, String].isValid(s) ?= s.isEmpty
   }
@@ -146,4 +147,5 @@ class StringPredicateSpec extends Properties("StringPredicate") {
 
     jvmErr || jsErr
   }
+  */
 }

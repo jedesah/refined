@@ -7,7 +7,7 @@ import eu.timepit.refined.generic.Equal
 import eu.timepit.refined.numeric.{GreaterEqual, LessEqual}
 import shapeless.Witness
 
-object collection extends CollectionPredicates with CollectionInferenceRules {
+object collection extends CollectionValidators with CollectionInferenceRules {
 
   /**
    * Predicate that counts the number of elements in a `TraversableOnce`
@@ -77,7 +77,7 @@ object collection extends CollectionPredicates with CollectionInferenceRules {
   type NonEmpty = Not[Empty]
 }
 
-private[refined] trait CollectionPredicates {
+private[refined] trait CollectionValidators {
 
   /*
   implicit def countPredicate[PA, PC, A, T](implicit pa: Predicate[PA, A], pc: Predicate[PC, Int], ev: T => TraversableOnce[A]): Predicate[Count[PA, PC], T] =
@@ -94,10 +94,12 @@ private[refined] trait CollectionPredicates {
 
       private def count(t: T): Int = t.count(pa.isValid)
     }
+*/
 
-  implicit def emptyPredicate[T](implicit ev: T => TraversableOnce[_]): Predicate[Empty, T] =
-    Predicate.instance2(_.isEmpty, Empty(), t => s"isEmpty($t)")
+  implicit def emptyValidator[T](implicit ev: T => TraversableOnce[_]): Validator.Flat[T, Empty] =
+    Validator.fromPredicate(_.isEmpty, Empty())
 
+  /*
   implicit def forallPredicate[P, A, T[A] <: TraversableOnce[A]](implicit p: Predicate[P, A]): Predicate[Forall[P], T[A]] =
     Predicate.instance2(
       _.forall(p.isValid),
@@ -136,19 +138,16 @@ private[refined] trait CollectionPredicates {
             Some("Predicate failed: empty collection.")
         }
     }
+*/
 
-  implicit def sizePredicate[P, T](implicit p: Predicate[P, Int], ev: T => TraversableOnce[_]): Predicate[Size[P], T] =
-    new Predicate[Size[P], T] {
-      def isValid(t: T): Boolean = p.isValid(t.size)
-      override def value: Size[P] = Size(p.value)
-      def show(t: T): String = p.show(t.size)
-
-      override def validate(t: T): Option[String] = {
-        val s = t.size
-        p.validate(s).map(msg => s"Predicate taking size($t) = $s failed: $msg")
-      }
-    }
-    */
+  implicit def sizeValidator[T, P, R](
+    implicit
+    v: Validator[Int, P, R], ev: T => TraversableOnce[_]
+  ): Validator[T, Size[P], Size[v.Res]] =
+    Validator.instance(t => {
+      val rv = v.validate(t.size)
+      rv.mapBoth(_ => t, _ => Size(rv))
+    })
 }
 
 private[refined] trait CollectionInferenceRules {

@@ -27,12 +27,14 @@ object Validator {
     def get[R](implicit v: Validator[T, P, R]): Validator[T, P, R] = v
   }
 
+  /** Constructs a [[Validator]] from its parameters. */
   def instance[T, P, R](validateFun: T => Result[T, R], constant: Boolean = false): Validator[T, P, R] =
     new Validator[T, P, R] {
       override def validate(t: T): Result[T, R] = validateFun(t)
-      override def isConstant: Boolean = constant
+      override val isConstant: Boolean = constant
     }
 
+  /** Constructs a constant [[Validator]] from its parameter. */
   def constant[T, P, R](validateFun: T => Result[T, R]): Validator[T, P, R] =
     instance(validateFun, constant = true)
 

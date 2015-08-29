@@ -1,7 +1,5 @@
 package eu.timepit.refined
 
-import scala.util.{Failure, Success, Try}
-
 /**
  * Type class for validating values of type `T` according to a type-level
  * predicate `P`. The semantics of `P` are defined by the instance(s) of
@@ -36,21 +34,6 @@ trait Predicate[P, T, Out] extends Serializable { self =>
   final def notValid(t: T): Boolean =
     !isValid(t)
 
-  /**
-   * Returns the result of [[isValid]] in a `List`. Can be overridden to
-   * accumulate the results of sub-predicates.
-   */
-  def accumulateIsValid(t: T): List[Boolean] =
-    List(isValid(t))
-
-  /**
-   * Returns the result of [[show]] in a `List`. Can be overridden to
-   * accumulate the string representations of sub-predicates.
-   */
-  /*def accumulateShow(t: T): List[String] =
-    List(show(t))
-*/
-
   /*
   private[refined] def contramap[U](f: U => T): Predicate[P, U] =
     new Predicate[P, U] {
@@ -66,41 +49,6 @@ trait Predicate[P, T, Out] extends Serializable { self =>
 
 object Predicate {
 
-  //type Aux[P, T, Out1] = Predicate[P, T] { type Out = Out1 }
-
   def apply[P, T, O](implicit p: Predicate[P, T, O]): Predicate[P, T, O] = p
 
-  /** Constructs a [[Predicate]] from its parameters. */
-  /*
-  def instance[P, T, O](isValidF: T => Boolean, showF: T => String, constant: Boolean = false): Predicate[P, T] =
-    new Predicate[P, T] {
-      def isValid(t: T): Boolean = isValidF(t)
-      def show(t: T): String = showF(t)
-      override val isConstant: Boolean = constant
-    }
-    */
-
-  /*
-  def instance2[P, T, O](isValidF: T => Boolean, valueV: P, showF: T => String, constant: Boolean = false): Predicate[P, T] =
-    new Predicate[P, T] {
-      def isValid(t: T): Boolean = isValidF(t)
-      override def value: P = valueV
-      def show(t: T): String = showF(t)
-      override val isConstant: Boolean = constant
-    }
-    */
-
-  /** Constructs a constant [[Predicate]] from its parameters. */
-  //def constant[P, T](isValidV: Boolean, showV: String): Predicate[P, T] =
-  //  instance(_ => isValidV, _ => showV, constant = true)
-
-  /*
-  /** Returns a [[Predicate]] that ignores its inputs and always yields `true`. */
-  def alwaysValid[P, T]: Predicate[P, T] =
-    constant(isValidV = true, "true")
-
-  /** Returns a [[Predicate]] that ignores its inputs and always yields `false`. */
-  def alwaysInvalid[P, T]: Predicate[P, T] =
-    constant(isValidV = false, "false")
-  */
 }

@@ -1,7 +1,10 @@
 package eu.timepit.refined
 
-import scala.util.Try
-
+/**
+ * Type class for validating values of type `T` according to a type-level
+ * predicate `P`. The semantics of `P` are defined by the instance(s) of
+ * this type class for `P`.
+ */
 trait Validator[T, P, R] extends Serializable { self =>
 
   final type Res = Result[T, R]
@@ -60,5 +63,5 @@ object Validator {
    * according to `P`.
    */
   def fromPartial[T, U, P](pf: T => U, p: P): Validator.Flat[T, P] =
-    fromPredicate(t => Try(pf(t)).isSuccess, p)
+    fromPredicate(t => scala.util.Try(pf(t)).isSuccess, p)
 }

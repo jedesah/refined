@@ -12,32 +12,32 @@ import scala.reflect.macros.blackbox
  */
 final class RefineMAux[F[_, _], P] {
 
-  def apply[T, O](t: T)(implicit p: Predicate[P, T, O], rt: RefType[F]): F[T, P] = macro RefineMAux.macroImpl[F, T, P, O]
+  def apply[T, R](t: T)(implicit v: Validator[T, P, R], rt: RefType[F]): F[T, P] = macro RefineMAux.macroImpl[F, T, P, R]
 }
 
 object RefineMAux {
 
-  def macroImpl[F[_, _], T: c.WeakTypeTag, P: c.WeakTypeTag, O](c: blackbox.Context)(t: c.Expr[T])(
-    p: c.Expr[Predicate[P, T, O]], rt: c.Expr[RefType[F]]
+  def macroImpl[F[_, _], T: c.WeakTypeTag, P: c.WeakTypeTag, R](c: blackbox.Context)(t: c.Expr[T])(
+    v: c.Expr[Validator[T, P, R]], rt: c.Expr[RefType[F]]
   ): c.Expr[F[T, P]] = {
     import c.universe._
 
-    val predicate = MacroUtils.eval(c)(p)
+    val validator = MacroUtils.eval(c)(v)
 
     val tValue: T = t.tree match {
       case Literal(Constant(value)) => value.asInstanceOf[T]
-      case _ if predicate.isConstant => null.asInstanceOf[T]
+      case _ if validator.isConstant => null.asInstanceOf[T]
       case _ => c.abort(
         c.enclosingPosition,
         "compile-time refinement only works with literals or constant predicates"
       )
     }
 
-    predicate.validate(tValue) match {
-      case None =>
+    validator.validate(tValue) match {
+      case Passed(_, _) =>
         val refType = MacroUtils.eval(c)(rt)
         refType.unsafeWrapM(c)(t)
-      case Some(msg) => c.abort(c.enclosingPosition, msg)
+      case rv => c.abort(c.enclosingPosition, rv.toString)
     }
   }
 }

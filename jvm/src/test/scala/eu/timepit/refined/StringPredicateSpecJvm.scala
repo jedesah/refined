@@ -44,4 +44,4 @@ class StringPredicateSpecJvm extends Properties("StringPredicate") {
   }
 
 }
-*/*/*/ 
+*/*/*/

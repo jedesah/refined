@@ -51,7 +51,7 @@ private[refined] trait BooleanValidators {
           case r @ Failed(_, _) => Passed(t, Not(r))
         }
 
-      override def isConstant: Boolean = v.isConstant
+      override val isConstant: Boolean = v.isConstant
     }
 
   implicit def andValidator[T, A, B, RA, RB](
@@ -65,7 +65,7 @@ private[refined] trait BooleanValidators {
           case (ra, rb) => Failed(t, And(ra, rb))
         }
 
-      override def isConstant: Boolean = va.isConstant && vb.isConstant
+      override val isConstant: Boolean = va.isConstant && vb.isConstant
     }
 
   implicit def orValidator[T, A, B, RA, RB](
@@ -79,7 +79,7 @@ private[refined] trait BooleanValidators {
           case (ra, rb) => Passed(t, Or(ra, rb))
         }
 
-      override def isConstant: Boolean = va.isConstant && vb.isConstant
+      override val isConstant: Boolean = va.isConstant && vb.isConstant
     }
 
   implicit def xorValidator[T, A, B, RA, RB](
@@ -94,7 +94,7 @@ private[refined] trait BooleanValidators {
           case (ra, rb) => Passed(t, Xor(ra, rb))
         }
 
-      override def isConstant: Boolean = va.isConstant && vb.isConstant
+      override val isConstant: Boolean = va.isConstant && vb.isConstant
     }
 
   implicit def allOfHNilValidator[T]: Validator.Flat[T, AllOf[HNil]] =
@@ -111,7 +111,7 @@ private[refined] trait BooleanValidators {
           case (rh, rt) => Failed(t, AllOf(rh :: rt.predicate.ps))
         }
 
-      override def isConstant: Boolean = vh.isConstant && vt.isConstant
+      override val isConstant: Boolean = vh.isConstant && vt.isConstant
     }
 
   implicit def anyOfHNilValidator[T]: Validator.Flat[T, AnyOf[HNil]] =
@@ -129,7 +129,7 @@ private[refined] trait BooleanValidators {
           case (rh, rt) => Failed(t, AnyOf(rh :: rt.predicate.ps))
         }
 
-      override def isConstant: Boolean = vh.isConstant && vt.isConstant
+      override val isConstant: Boolean = vh.isConstant && vt.isConstant
     }
 
   implicit def oneOfHNilValidator[T]: Validator.Flat[T, OneOf[HNil]] =
@@ -151,7 +151,7 @@ private[refined] trait BooleanValidators {
         }
       }
 
-      override def isConstant: Boolean = vh.isConstant && vt.isConstant
+      override val isConstant: Boolean = vh.isConstant && vt.isConstant
     }
 }
 

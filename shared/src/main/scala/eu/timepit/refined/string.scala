@@ -42,29 +42,26 @@ private[refined] trait StringValidators {
   implicit def matchesRegexValidator[R <: String](implicit wr: Witness.Aux[R]): Validator.Flat[String, MatchesRegex[R]] =
     Validator.fromPredicate(_.matches(wr.value), MatchesRegex(wr.value))
 
-  /*
+  implicit def regexValidator: Validator.Flat[String, Regex] =
+    Validator.fromPartial(new scala.util.matching.Regex(_), Regex())
 
-  implicit def regexPredicate: Predicate[Regex, String] =
-    Predicate.fromPartial(new scala.util.matching.Regex(_), "Regex")
+  implicit def startsWithValidator[S <: String](implicit ws: Witness.Aux[S]): Validator.Flat[String, StartsWith[S]] =
+    Validator.fromPredicate(_.startsWith(ws.value), StartsWith(ws.value))
 
-  implicit def startsWithPredicate[R <: String](implicit wr: Witness.Aux[R]): Predicate[StartsWith[R], String] =
-    Predicate.instance2(_.startsWith(wr.value), StartsWith(wr.value), t => s""""$t".startsWith("${wr.value}")""")
+  implicit def uriValidator: Validator.Flat[String, Uri] =
+    Validator.fromPartial(new java.net.URI(_), Uri())
 
-  implicit def uriPredicate: Predicate[Uri, String] =
-    Predicate.fromPartial(new java.net.URI(_), "Uri")
+  implicit def urlValidator: Validator.Flat[String, Url] =
+    Validator.fromPartial(new java.net.URL(_), Url())
 
-  implicit def urlPredicate: Predicate[Url, String] =
-    Predicate.fromPartial(new java.net.URL(_), "Url")
+  implicit def uuidValidator: Validator.Flat[String, Uuid] =
+    Validator.fromPartial(java.util.UUID.fromString, Uuid())
 
-  implicit def uuidPredicate: Predicate[Uuid, String] =
-    Predicate.fromPartial(java.util.UUID.fromString, "Uuid")
+  implicit def xmlValidator: Validator.Flat[String, Xml] =
+    Validator.fromPartial(scala.xml.XML.loadString, Xml())
 
-  implicit def xmlPredicate: Predicate[Xml, String] =
-    Predicate.fromPartial(scala.xml.XML.loadString, "Xml")
-
-  implicit def xpathPredicate: Predicate[XPath, String] =
-    Predicate.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, "XPath")
-    */
+  implicit def xpathValidator: Validator.Flat[String, XPath] =
+    Validator.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, XPath())
 }
 
 private[refined] trait StringInferenceRules {

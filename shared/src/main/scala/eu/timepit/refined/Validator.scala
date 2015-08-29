@@ -1,5 +1,7 @@
 package eu.timepit.refined
 
+import scala.util.Try
+
 trait Validator[T, P, R] extends Serializable {
 
   type Res = Result[T, R]
@@ -27,6 +29,9 @@ object Validator {
 
   def constant[T, P, R](validateFun: T => Result[T, R]): Validator[T, P, R] =
     instance(validateFun, constant = true)
+
+  def fromPartial[T, U, P](pf: T => U, p: P): Validator.Flat[T, P] =
+    fromPredicate(t => Try(pf(t)).isSuccess, p)
 
   def fromPredicate[T, P](f: T => Boolean, p: P): Validator.Flat[T, P] =
     instance(t => if (f(t)) Passed(t, p) else Failed(t, p))

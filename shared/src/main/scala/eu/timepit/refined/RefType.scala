@@ -68,9 +68,8 @@ trait RefType[F[_, _]] extends Serializable {
   def refineM[P]: RefineMAux[F, P] =
     new RefineMAux
 
-  //def mapRefine[T, P, U](tp: F[T, P])(f: T => U)(implicit p: Predicate[P, U]): Either[String, F[U, P]] =
-  //  ???
-  //refine(f(unwrap(tp)))
+  def mapRefine[T, P, U, R](tp: F[T, P])(f: T => U)(implicit v: Validator[U, P, R]): Either[v.Res, F[U, P]] =
+    refine(f(unwrap(tp)))
 }
 
 object RefType {
@@ -111,8 +110,8 @@ object RefType {
     def unwrap: T =
       F.unwrap(tp)
 
-    //def mapRefine[U](f: T => U)(implicit p: Predicate[P, U]): Either[String, F[U, P]] =
-    //  F.mapRefine(tp)(f)
+    def mapRefine[U, R](f: T => U)(implicit v: Validator[U, P, R]): Either[v.Res, F[U, P]] =
+      F.mapRefine(tp)(f)
   }
 
   object ops {

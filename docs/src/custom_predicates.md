@@ -30,7 +30,7 @@ one that checks if a given `Point` lies in the corresponding quadrant and one
 that provides a string representation for the predicate that is used for error
 messages:
 
-```tut:silent
+```
 import eu.timepit.refined.Predicate
 
 implicit val quadrant1Predicate: Predicate[Quadrant1, Point] =
@@ -49,7 +49,7 @@ implicit val quadrant4Predicate: Predicate[Quadrant4, Point] =
 We have now everything in place to refine `Point` values with the `refineT`
 function and our predicates:
 
-```tut
+```
 import eu.timepit.refined.refineT
 
 refineT[Quadrant1](Point(1, 3))
@@ -63,7 +63,7 @@ We can also use refined's higher order predicates, which take other predicates
 as arguments, with our quadrant predicates (without defining corresponding
 `Predicate` instances):
 
-```tut
+```
 import eu.timepit.refined.boolean.Not
 
 refineT[Not[Quadrant1]](Point(-3, -9))

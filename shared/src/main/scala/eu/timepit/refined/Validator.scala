@@ -8,11 +8,18 @@ trait Validator[T, P, R] extends Serializable { self =>
 
   def validate(t: T): Res
 
+  /**
+   * Denotes whether this [[Validator]] is constant (which is false by
+   * default). A constant [[Validator]] ignores the argument passed to
+   * [[validate]].
+   */
   def isConstant: Boolean = false
 
+  /** Checks if `t` satisfies the predicate `P`. */
   final def isValid(t: T): Boolean =
     validate(t).isPassed
 
+  /** Checks if `t` does not satisfy the predicate `P`. */
   final def notValid(t: T): Boolean =
     validate(t).isFailed
 

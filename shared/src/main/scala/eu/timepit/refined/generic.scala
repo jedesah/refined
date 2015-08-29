@@ -7,7 +7,7 @@ import shapeless.ops.hlist.ToList
 import shapeless.ops.record.Keys
 import shapeless.{Coproduct, HList, LabelledGeneric, Witness}
 
-object generic extends GenericPredicates with GenericInferenceRules {
+object generic extends GenericValidators with GenericInferenceRules {
 
   /** Predicate that checks if a value is equal to `U`. */
   case class Equal[U](u: U)
@@ -25,47 +25,55 @@ object generic extends GenericPredicates with GenericInferenceRules {
   case class Supertype[U]()
 }
 
-private[refined] trait GenericPredicates {
+private[refined] trait GenericValidators {
 
-  /*
-  implicit def equalPredicate[T, U <: T](implicit wu: Witness.Aux[U]): Predicate[Equal[U], T] =
-    Predicate.instance2(_ == wu.value, Equal(wu.value), t => s"($t == ${wu.value})")
+  implicit def equalValidator[T, U <: T](implicit wu: Witness.Aux[U]): Validator.Flat[T, Equal[U]] =
+    Validator.fromPredicate(_ == wu.value, Equal(wu.value))
 
-  implicit def ctorNamesPredicate[T, P, R0 <: Coproduct, R1 <: HList, K <: HList](
+  implicit def ctorNamesValidator[T, P, R, R0 <: Coproduct, R1 <: HList, K <: HList](
     implicit
     lg: LabelledGeneric.Aux[T, R0],
     cthl: ToHList.Aux[R0, R1],
     keys: Keys.Aux[R1, K],
     ktl: ToList[K, Symbol],
-    p: Predicate[P, List[String]]
-  ): Predicate[ConstructorNames[P], T] = {
+    v: Validator[List[String], P, R]
+  ): Validator[T, ConstructorNames[P], ConstructorNames[v.Res]] =
+    new Validator[T, ConstructorNames[P], ConstructorNames[v.Res]] {
+      override def validate(t: T): Res = {
+        val ctorNames = keys().toList.map(_.name)
+        val rv = v.validate(ctorNames)
+        rv.mapBoth(_ => t, _ => ConstructorNames(rv))
+      }
 
-    val ctorNames = keys().toList.map(_.name)
-    Predicate.constant(p.isValid(ctorNames), p.show(ctorNames))
-  }
+      override val isConstant: Boolean = true
+    }
 
-  implicit def fieldNamesPredicate[T, P, R <: HList, K <: HList](
+  implicit def fieldNamesValidator[T, P, R, R0 <: HList, K <: HList](
     implicit
-    lg: LabelledGeneric.Aux[T, R],
-    keys: Keys.Aux[R, K],
+    lg: LabelledGeneric.Aux[T, R0],
+    keys: Keys.Aux[R0, K],
     ktl: ToList[K, Symbol],
-    p: Predicate[P, List[String]]
-  ): Predicate[FieldNames[P], T] = {
+    v: Validator[List[String], P, R]
+  ): Validator[T, FieldNames[P], FieldNames[v.Res]] =
+    new Validator[T, FieldNames[P], FieldNames[v.Res]] {
+      override def validate(t: T): Res = {
+        val fieldNames = keys().toList.map(_.name)
+        val rv = v.validate(fieldNames)
+        rv.mapBoth(_ => t, _ => FieldNames(rv))
+      }
 
-    val fieldNames = keys().toList.map(_.name)
-    Predicate.constant(p.isValid(fieldNames), p.show(fieldNames))
-  }
+      override val isConstant: Boolean = true
+    }
 
-  implicit def subtypePredicate[T, U >: T]: Predicate[Subtype[U], T] =
-    Predicate.alwaysValid
+  implicit def subtypeValidator[T, U >: T]: Validator.Flat[T, Subtype[U]] =
+    Validator.constant(t => Passed(t, Subtype()))
 
-  implicit def supertypePredicate[T, U <: T]: Predicate[Supertype[U], T] =
-    Predicate.alwaysValid
-    */
+  implicit def supertypeValidator[T, U <: T]: Validator.Flat[T, Supertype[U]] =
+    Validator.constant(t => Passed(t, Supertype()))
 }
 
 private[refined] trait GenericInferenceRules {
 
-  //implicit def equalPredicateInference[T, U <: T, P](implicit p: Predicate[P, T], wu: Witness.Aux[U]): Equal[U] ==> P =
-  //  InferenceRule(p.isValid(wu.value), s"equalPredicateInference(${p.show(wu.value)})")
+  implicit def equalValidatorInference[T, U <: T, P, R](implicit v: Validator[T, P, R], wu: Witness.Aux[U]): Equal[U] ==> P =
+    InferenceRule(v.isValid(wu.value), s"equalValidatorInference(${wu.value})")
 }

@@ -4,11 +4,17 @@ import scala.util.Try
 
 trait Validator[T, P, R] extends Serializable {
 
-  type Res = Result[T, R]
+  final type Res = Result[T, R]
 
   def validate(t: T): Res
 
   def isConstant: Boolean = false
+
+  final def isValid(t: T): Boolean =
+    validate(t).isPassed
+
+  final def notValid(t: T): Boolean =
+    validate(t).isFailed
 }
 
 object Validator {

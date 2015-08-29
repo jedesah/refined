@@ -79,22 +79,15 @@ object collection extends CollectionValidators with CollectionInferenceRules {
 
 private[refined] trait CollectionValidators {
 
-  /*
-  implicit def countPredicate[PA, PC, A, T](implicit pa: Predicate[PA, A], pc: Predicate[PC, Int], ev: T => TraversableOnce[A]): Predicate[Count[PA, PC], T] =
-    new Predicate[Count[PA, PC], T] {
-      def isValid(t: T): Boolean = pc.isValid(count(t))
-      override def value: Count[PA, PC] = Count(pa.value, pc.value)
-      def show(t: T): String = pc.show(count(t))
-
-      override def validate(t: T): Option[String] = {
-        val c = count(t)
-        val expr = t.toSeq.map(pa.show).mkString("count(", ", ", ")")
-        pc.validate(c).map(msg => s"Predicate taking $expr = $c failed: $msg")
-      }
-
-      private def count(t: T): Int = t.count(pa.isValid)
-    }
-*/
+  implicit def countValidator[A, PA, RA, PC, RC, T](
+    implicit
+    va: Validator[A, PA, RA], vc: Validator[Int, PC, RC], ev: T => TraversableOnce[A]
+  ): Validator[T, Count[PA, PC], Count[List[va.Res], vc.Res]] =
+    Validator.instance(t => {
+      val ra = t.toList.map(va.validate)
+      val rc = vc.validate(ra.count(_.isPassed))
+      rc.mapBoth(_ => t, _ => Count(ra, rc))
+    })
 
   implicit def emptyValidator[T](implicit ev: T => TraversableOnce[_]): Validator.Flat[T, Empty] =
     Validator.fromPredicate(_.isEmpty, Empty())

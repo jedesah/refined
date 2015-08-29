@@ -99,17 +99,22 @@ private[refined] trait CollectionValidators {
   implicit def emptyValidator[T](implicit ev: T => TraversableOnce[_]): Validator.Flat[T, Empty] =
     Validator.fromPredicate(_.isEmpty, Empty())
 
+  implicit def forallValidator[A, P, R, T[A] <: TraversableOnce[A]](
+    implicit
+    v: Validator[A, P, R]
+  ): Validator[T[A], Forall[P], Forall[List[v.Res]]] =
+    Validator.instance(t => {
+      val rt = t.toList.map(v.validate)
+      if (rt.forall(_.isPassed)) Passed(t, Forall(rt)) else Failed(t, Forall(rt))
+    })
+
+  implicit def forallValidatorView[A, P, R, T](
+    implicit
+    v: Validator[A, P, R], ev: T => TraversableOnce[A]
+  ): Validator[T, Forall[P], Forall[List[v.Res]]] =
+    forallValidator.contramap(ev)
+
   /*
-  implicit def forallPredicate[P, A, T[A] <: TraversableOnce[A]](implicit p: Predicate[P, A]): Predicate[Forall[P], T[A]] =
-    Predicate.instance2(
-      _.forall(p.isValid),
-      Forall(p.value),
-      _.toSeq.map(p.show).mkString("(", " && ", ")")
-    )
-
-  implicit def forallPredicateView[P, A, T](implicit p: Predicate[P, A], ev: T => TraversableOnce[A]): Predicate[Forall[P], T] =
-    forallPredicate.contramap(ev)
-
   implicit def headPredicate[P, A, T[A] <: Traversable[A]](implicit p: Predicate[P, A]): Predicate[Head[P], T[A]] =
     singleElemPredicate(_.headOption, (t: T[A], a: A) => s"head($t) = $a")
 

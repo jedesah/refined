@@ -2,7 +2,7 @@ package eu.timepit.refined
 
 import scala.util.Try
 
-trait Validator[T, P, R] extends Serializable {
+trait Validator[T, P, R] extends Serializable { self =>
 
   final type Res = Result[T, R]
 
@@ -15,6 +15,12 @@ trait Validator[T, P, R] extends Serializable {
 
   final def notValid(t: T): Boolean =
     validate(t).isFailed
+
+  private[refined] def contramap[U](f: U => T): Validator[U, P, R] =
+    new Validator[U, P, R] {
+      override def validate(u: U): Res = self.validate(f(u)).mapFst(_ => u)
+      override def isConstant: Boolean = self.isConstant
+    }
 }
 
 object Validator {

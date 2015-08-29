@@ -15,6 +15,9 @@ sealed trait Result[T, P] extends Product with Serializable {
   def mapBoth[U, Q](f: T => U, g: P => Q): Result[U, Q] =
     fold((t, p) => Passed(f(t), g(p)), (t, p) => Failed(f(t), g(p)))
 
+  def mapFst[U](f: T => U): Result[U, P] =
+    mapBoth(f, identity)
+
   def isPassed: Boolean =
     fold((_, _) => true, (_, _) => false)
 

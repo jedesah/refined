@@ -4,7 +4,7 @@ import eu.timepit.refined.InferenceRule.==>
 import eu.timepit.refined.string._
 import shapeless.Witness
 
-object string extends StringPredicates with StringInferenceRules {
+object string extends StringValidators with StringInferenceRules {
 
   /** Predicate that checks if a `String` ends with the suffix `S`. */
   case class EndsWith[S](s: S)
@@ -34,14 +34,15 @@ object string extends StringPredicates with StringInferenceRules {
   case class XPath()
 }
 
-private[refined] trait StringPredicates {
+private[refined] trait StringValidators {
+
+  implicit def endsWithValidator[S <: String](implicit ws: Witness.Aux[S]): Validator.Flat[String, EndsWith[S]] =
+    Validator.fromPredicate(_.endsWith(ws.value), EndsWith(ws.value))
+
+  implicit def matchesRegexValidator[R <: String](implicit wr: Witness.Aux[R]): Validator.Flat[String, MatchesRegex[R]] =
+    Validator.fromPredicate(_.matches(wr.value), MatchesRegex(wr.value))
 
   /*
-  implicit def endsWithPredicate[R <: String](implicit wr: Witness.Aux[R]): Predicate[EndsWith[R], String] =
-    Predicate.instance2(_.endsWith(wr.value), EndsWith(wr.value), t => s""""$t".endsWith("${wr.value}")""")
-
-  implicit def matchesRegexPredicate[R <: String](implicit wr: Witness.Aux[R]): Predicate[MatchesRegex[R], String] =
-    Predicate.instance2(_.matches(wr.value), MatchesRegex(wr.value), t => s""""$t".matches("${wr.value}")""")
 
   implicit def regexPredicate: Predicate[Regex, String] =
     Predicate.fromPartial(new scala.util.matching.Regex(_), "Regex")

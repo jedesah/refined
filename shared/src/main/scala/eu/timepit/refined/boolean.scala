@@ -2,9 +2,10 @@ package eu.timepit.refined
 
 import eu.timepit.refined.InferenceRule.==>
 import eu.timepit.refined.boolean._
-import shapeless.{ ::, HList, HNil }
+import shapeless.ops.hlist.ToList
+import shapeless.{::, HList, HNil}
 
-object boolean extends BooleanPredicates with BooleanInferenceRules0 {
+object boolean extends BooleanValidators with BooleanInferenceRules0 {
 
   /** Constant predicate that is always `true`. */
   case class True()
@@ -34,148 +35,124 @@ object boolean extends BooleanPredicates with BooleanInferenceRules0 {
   case class OneOf[PS](ps: PS)
 }
 
-private[refined] trait BooleanPredicates {
+private[refined] trait BooleanValidators {
 
-  implicit def truePredicate[T]: Predicate[True, T, Result[True]] =
-    new Predicate[True, T, Result[True]] {
+  implicit def trueValidator[T]: Validator[T, True, True] =
+    Validator.constant(t => Passed(t, True()))
 
-      override def isValid(t: T): Boolean = true
+  implicit def falseValidator[T]: Validator[T, False, False] =
+    Validator.constant(t => Failed(t, False()))
 
-      override def value: True = True()
-    }
-
-  implicit val trueShow: Show[True] =
-    new Show[True] {
-      def show(a: True): String = "true"
-    }
-
-  implicit val falseShow: Show[False] =
-    new Show[False] {
-      def show(a: False): String = "false"
-    }
-
-  implicit def falsePredicate[T]: Predicate[False, T, Result[False]] =
-    new Predicate[False, T, Result[False]] {
-
-      override def isValid(t: T): Boolean = false
-
-      override def value: False = False()
-    }
-
-  implicit def notPredicate[P, T, O](implicit p: Predicate[P, T, O]): Predicate[Not[P], T, Result[Not[O]]] =
-    new Predicate[Not[P], T, Result[Not[O]]] {
-      def isValid(t: T): Boolean = !p.isValid(t)
-      override def value: Not[P] = Not(p.value)
-      //override def show(t: T): String = s"!${p.show(t)}"
-
-      /*
-      override def validate(t: T): Option[String] =
-        p.validate(t) match {
-          case Some(_) => None
-          case None => Some(s"Predicate ${p.show(t)} did not fail.")
-        }*/
-
-      override val isConstant: Boolean = p.isConstant
-    }
-
-  implicit def andPredicate[A, B, T, AOut, BOut](implicit pa: Predicate[A, T, AOut], pb: Predicate[B, T, BOut]): Predicate[A And B, T, Result[And[AOut, BOut]]] =
-    new Predicate[A And B, T, Result[And[AOut, BOut]]] {
-      def isValid(t: T): Boolean = pa.isValid(t) && pb.isValid(t)
-      override def value: And[A, B] = And(pa.value, pb.value)
-      //override def show(t: T): String = s"(${pa.show(t)} && ${pb.show(t)})"
-
-      // Fixme: Do we want "And[A, B] | A | B" as return type here?
-      // This requires a common type for And, A, and B
-      /*override def validate(t: T): Option[String] =
-        (pa.validate(t), pb.validate(t)) match {
-          case (Some(sl), Some(sr)) =>
-            Some(s"Both predicates of ${show(t)} failed. Left: $sl Right: $sr")
-          case (Some(sl), None) =>
-            Some(s"Left predicate of ${show(t)} failed: $sl")
-          case (None, Some(sr)) =>
-            Some(s"Right predicate of ${show(t)} failed: $sr")
-          case _ => None
-        }*/
-
-      override def validate2(t: T): Result[And[AOut, BOut]] =
-        (pa.validate2(t), pb.validate2(t)) match {
-          case (a @ Passed(_), b: Passed[_]) => Passed(And(pa.validate2(t), pb.validate2(t)))
-          case (a, b) => Failed(And(a, b))
+  implicit def notValidator[T, P, R](implicit v: Validator[T, P, R]): Validator[T, Not[P], Not[v.Res]] =
+    new Validator[T, Not[P], Not[v.Res]] {
+      override def validate(t: T): Res =
+        v.validate(t) match {
+          case r @ Passed(_, _) => Failed(t, Not(r))
+          case r @ Failed(_, _) => Passed(t, Not(r))
         }
 
-      override val isConstant: Boolean = pa.isConstant && pb.isConstant
+      override def isConstant: Boolean = v.isConstant
     }
 
-  /*
-  implicit def orPredicate[A, B, T](implicit pa: Predicate[A, T], pb: Predicate[B, T]): Predicate[A Or B, T] =
-    new Predicate[A Or B, T] {
-      def isValid(t: T): Boolean = pa.isValid(t) || pb.isValid(t)
-      def show(t: T): String = s"(${pa.show(t)} || ${pb.show(t)})"
-
-      override def validate(t: T): Option[String] =
-        (pa.validate(t), pb.validate(t)) match {
-          case (Some(sl), Some(sr)) =>
-            Some(s"Both predicates of ${show(t)} failed. Left: $sl Right: $sr")
-          case _ => None
+  implicit def andValidator[T, A, B, RA, RB](
+    implicit
+    va: Validator[T, A, RA], vb: Validator[T, B, RB]
+  ): Validator[T, A And B, va.Res And vb.Res] =
+    new Validator[T, A And B, va.Res And vb.Res] {
+      override def validate(t: T): Res =
+        (va.validate(t), vb.validate(t)) match {
+          case (ra @ Passed(_, _), rb @ Passed(_, _)) => Passed(t, And(ra, rb))
+          case (ra, rb) => Failed(t, And(ra, rb))
         }
 
-      override val isConstant: Boolean = pa.isConstant && pb.isConstant
+      override def isConstant: Boolean = va.isConstant && vb.isConstant
     }
 
-  implicit def xorPredicate[A, B, T](implicit pa: Predicate[A, T], pb: Predicate[B, T]): Predicate[A Xor B, T] =
-    new Predicate[A Xor B, T] {
-      def isValid(t: T): Boolean = pa.isValid(t) ^ pb.isValid(t)
-      def show(t: T): String = s"(${pa.show(t)} ^ ${pb.show(t)})"
-
-      override def validate(t: T): Option[String] =
-        (pa.validate(t), pb.validate(t)) match {
-          case (Some(sl), Some(sr)) =>
-            Some(s"Both predicates of ${show(t)} failed. Left: $sl Right: $sr")
-          case (None, None) =>
-            Some(s"Both predicates of ${show(t)} succeeded.")
-          case _ => None
+  implicit def orValidator[T, A, B, RA, RB](
+    implicit
+    va: Validator[T, A, RA], vb: Validator[T, B, RB]
+  ): Validator[T, A Or B, va.Res Or vb.Res] =
+    new Validator[T, A Or B, va.Res Or vb.Res] {
+      override def validate(t: T): Res =
+        (va.validate(t), vb.validate(t)) match {
+          case (ra @ Failed(_, _), rb @ Failed(_, _)) => Failed(t, Or(ra, rb))
+          case (ra, rb) => Passed(t, Or(ra, rb))
         }
 
-      override val isConstant: Boolean = pa.isConstant && pb.isConstant
+      override def isConstant: Boolean = va.isConstant && vb.isConstant
     }
 
-  implicit def allOfHNilPredicate[T]: Predicate[AllOf[HNil], T] =
-    Predicate.alwaysValid
+  implicit def xorValidator[T, A, B, RA, RB](
+    implicit
+    va: Validator[T, A, RA], vb: Validator[T, B, RB]
+  ): Validator[T, A Xor B, va.Res Xor vb.Res] =
+    new Validator[T, A Xor B, va.Res Xor vb.Res] {
+      override def validate(t: T): Res =
+        (va.validate(t), vb.validate(t)) match {
+          case (ra @ Failed(_, _), rb @ Failed(_, _)) => Failed(t, Xor(ra, rb))
+          case (ra @ Passed(_, _), rb @ Passed(_, _)) => Failed(t, Xor(ra, rb))
+          case (ra, rb) => Passed(t, Xor(ra, rb))
+        }
 
-  implicit def allOfHConsPredicate[PH, PT <: HList, T](implicit ph: Predicate[PH, T], pt: Predicate[AllOf[PT], T]): Predicate[AllOf[PH :: PT], T] =
-    Predicate.instance(
-      t => ph.isValid(t) && pt.isValid(t),
-      t => s"(${ph.show(t)} && ${pt.show(t)})",
-      ph.isConstant && pt.isConstant
-    )
-
-  implicit def anyOfHNilPredicate[T]: Predicate[AnyOf[HNil], T] =
-    Predicate.alwaysInvalid
-
-  implicit def anyOfHConsPredicate[PH, PT <: HList, T](implicit ph: Predicate[PH, T], pt: Predicate[AnyOf[PT], T]): Predicate[AnyOf[PH :: PT], T] =
-    Predicate.instance(
-      t => ph.isValid(t) || pt.isValid(t),
-      t => s"(${ph.show(t)} || ${pt.show(t)})",
-      ph.isConstant && pt.isConstant
-    )
-
-  implicit def oneOfHNilPredicate[T]: Predicate[OneOf[HNil], T] =
-    Predicate.alwaysInvalid
-
-  implicit def oneOfHConsPredicate[PH, PT <: HList, T](implicit ph: Predicate[PH, T], pt: Predicate[OneOf[PT], T]): Predicate[OneOf[PH :: PT], T] =
-    new Predicate[OneOf[PH :: PT], T] {
-      def isValid(t: T): Boolean = accumulateIsValid(t).count(identity) == 1
-      def show(t: T): String = accumulateShow(t).mkString("oneOf(", ", ", ")")
-
-      override val isConstant: Boolean = ph.isConstant && pt.isConstant
-
-      override def accumulateIsValid(t: T): List[Boolean] =
-        ph.isValid(t) :: pt.accumulateIsValid(t)
-
-      override def accumulateShow(t: T): List[String] =
-        ph.show(t) :: pt.accumulateShow(t)
+      override def isConstant: Boolean = va.isConstant && vb.isConstant
     }
-    */
+
+  implicit def allOfHNilValidator[T]: Validator.Flat[T, AllOf[HNil]] =
+    Validator.constant(t => Passed(t, AllOf(HList())))
+
+  implicit def allOfHConsValidator[T, PH, PT <: HList, RH, RT <: HList](
+    implicit
+    vh: Validator[T, PH, RH], vt: Validator[T, AllOf[PT], AllOf[RT]]
+  ): Validator[T, AllOf[PH :: PT], AllOf[vh.Res :: RT]] =
+    new Validator[T, AllOf[PH :: PT], AllOf[vh.Res :: RT]] {
+      override def validate(t: T): Res =
+        (vh.validate(t), vt.validate(t)) match {
+          case (rh @ Passed(_, _), rt @ Passed(_, _)) => Passed(t, AllOf(rh :: rt.predicate.ps))
+          case (rh, rt) => Failed(t, AllOf(rh :: rt.predicate.ps))
+        }
+
+      override def isConstant: Boolean = vh.isConstant && vt.isConstant
+    }
+
+  implicit def anyOfHNilValidator[T]: Validator.Flat[T, AnyOf[HNil]] =
+    Validator.constant(t => Failed(t, AnyOf(HList())))
+
+  implicit def anyOfHConsValidator[T, PH, PT <: HList, RH, RT <: HList](
+    implicit
+    vh: Validator[T, PH, RH], vt: Validator[T, AnyOf[PT], AnyOf[RT]]
+  ): Validator[T, AnyOf[PH :: PT], AnyOf[vh.Res :: RT]] =
+    new Validator[T, AnyOf[PH :: PT], AnyOf[vh.Res :: RT]] {
+      override def validate(t: T): Res =
+        (vh.validate(t), vt.validate(t)) match {
+          case (rh @ Passed(_, _), rt) => Passed(t, AnyOf(rh :: rt.predicate.ps))
+          case (rh, rt @ Passed(_, _)) => Passed(t, AnyOf(rh :: rt.predicate.ps))
+          case (rh, rt) => Failed(t, AnyOf(rh :: rt.predicate.ps))
+        }
+
+      override def isConstant: Boolean = vh.isConstant && vt.isConstant
+    }
+
+  implicit def oneOfHNilValidator[T]: Validator.Flat[T, OneOf[HNil]] =
+    Validator.constant(t => Failed(t, OneOf(HList())))
+
+  implicit def oneOfHConsValidator[T, PH, PT <: HList, RH, RT <: HList](
+    implicit
+    vh: Validator[T, PH, RH], vt: Validator[T, OneOf[PT], OneOf[RT]], toList: ToList[RT, Result[_, _]]
+  ): Validator[T, OneOf[PH :: PT], OneOf[vh.Res :: RT]] =
+    new Validator[T, OneOf[PH :: PT], OneOf[vh.Res :: RT]] {
+      override def validate(t: T): Res = {
+        val rt = vt.validate(t).predicate.ps
+        val passedCount = toList(rt).count(_.isPassed)
+
+        vh.validate(t) match {
+          case rh @ Passed(_, _) if passedCount == 0 => Passed(t, OneOf(rh :: rt))
+          case rh @ Failed(_, _) if passedCount == 1 => Passed(t, OneOf(rh :: rt))
+          case rh => Failed(t, OneOf(rh :: rt))
+        }
+      }
+
+      override def isConstant: Boolean = vh.isConstant && vt.isConstant
+    }
 }
 
 private[refined] trait BooleanInferenceRules0 extends BooleanInferenceRules1 {

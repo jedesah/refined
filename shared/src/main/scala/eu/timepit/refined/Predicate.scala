@@ -1,6 +1,6 @@
 package eu.timepit.refined
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 /**
  * Type class for validating values of type `T` according to a type-level
@@ -23,7 +23,7 @@ trait Predicate[P, T, Out] extends Serializable { self =>
     if (isValid(t)) None else Some(s"Predicate failed: .")
 
   def validate2(t: T): Out =
-    if (isValid(t)) Passed(value).asInstanceOf[Out] else Failed(value).asInstanceOf[Out]
+    if (isValid(t)) Passed(t, value).asInstanceOf[Out] else Failed(t, value).asInstanceOf[Out]
 
   /**
    * Denotes whether this [[Predicate]] is constant (which is false by

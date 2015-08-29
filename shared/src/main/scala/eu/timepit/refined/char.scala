@@ -3,7 +3,7 @@ package eu.timepit.refined
 import eu.timepit.refined.boolean.Or
 import eu.timepit.refined.char._
 
-object char extends CharPredicates {
+object char extends CharValidators {
 
   /** Predicate that checks if a `Char` is a digit. */
   case class Digit()
@@ -24,22 +24,20 @@ object char extends CharPredicates {
   type LetterOrDigit = Letter Or Digit
 }
 
-private[refined] trait CharPredicates {
+private[refined] trait CharValidators {
 
-  /*
-  implicit def digitPredicate: Predicate[Digit, Char] =
-    Predicate.instance2(_.isDigit, Digit(), t => s"isDigit('$t')")
+  implicit def digitValidator: Validator.Flat[Char, Digit] =
+    Validator.fromPredicate(_.isDigit, Digit())
 
-  implicit def letterPredicate: Predicate[Letter, Char] =
-    Predicate.instance2(_.isLetter, Letter(), t => s"isLetter('$t')")
+  implicit def letterValidator: Validator.Flat[Char, Letter] =
+    Validator.fromPredicate(_.isLetter, Letter())
 
-  implicit def lowerCasePredicate: Predicate[LowerCase, Char] =
-    Predicate.instance2(_.isLower, LowerCase(), t => s"isLower('$t')")
+  implicit def lowerCaseValidator: Validator.Flat[Char, LowerCase] =
+    Validator.fromPredicate(_.isLower, LowerCase())
 
-  implicit def upperCasePredicate: Predicate[UpperCase, Char] =
-    Predicate.instance2(_.isUpper, UpperCase(), t => s"isUpper('$t')")
+  implicit def upperCaseValidator: Validator.Flat[Char, UpperCase] =
+    Validator.fromPredicate(_.isUpper, UpperCase())
 
-  implicit def whitespacePredicate: Predicate[Whitespace, Char] =
-    Predicate.instance2(_.isWhitespace, Whitespace(), t => s"isWhitespace('$t')")
-    */
+  implicit def whitespaceValidator: Validator.Flat[Char, Whitespace] =
+    Validator.fromPredicate(_.isWhitespace, Whitespace())
 }

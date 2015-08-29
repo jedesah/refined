@@ -1,19 +1,20 @@
 package eu.timepit.refined
 
-sealed trait Result[P] {
-  def p: P
-}
+sealed trait Result[T, P] {
 
-case class Passed[P](p: P) extends Result[P]
-case class Failed[P](p: P) extends Result[P]
+  def value: T
 
-object Result {
-  implicit def resultShow[A](implicit sa: Show[A]): Show[Result[A]] =
-    new Show[Result[A]] {
-      override def show(p: Result[A]): String =
-        p match {
-          case Passed(a) => "passed: " + sa.show(a)
-          case Failed(a) => "failed: " + sa.show(a)
-        }
+  def predicate: P
+
+  def fold[A](ifPassed: Result[T, P] => A, ifFailed: Result[T, P] => A): A =
+    this match {
+      case Passed(_, _) => ifPassed(this)
+      case Failed(_, _) => ifFailed(this)
     }
+
+  def isPassed: Boolean =
+    fold(_ => true, _ => false)
 }
+
+case class Passed[T, P](value: T, predicate: P) extends Result[T, P]
+case class Failed[T, P](value: T, predicate: P) extends Result[T, P]

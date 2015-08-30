@@ -37,4 +37,10 @@ object Result {
 
   def fromBoolean[T, P](b: Boolean, t: T, p: P): Result[T, P] =
     if (b) Passed(t, p) else Failed(t, p)
+
+
+  implicit def showResult[T, P](implicit sa: Show[T, P]): Show[T, Result[T, P]] =
+    new Show[T, Result[T, P]] {
+      override def show(t: T): String = sa.show(t)
+    }
 }

@@ -6,7 +6,7 @@ import eu.timepit.refined.boolean._
 import shapeless.ops.hlist.ToList
 import shapeless.{::, HList, HNil}
 
-object boolean extends BooleanValidators with BooleanInferenceRules0 {
+object boolean extends BooleanValidators with BooleanInferenceRules0 with BooleanShows {
 
   /** Constant predicate that is always `true`. */
   case class True()
@@ -160,7 +160,7 @@ private[refined] trait BooleanShows {
 
   implicit def andShow[T, A, B](implicit sa: Show[T, A], sb: Show[T, B]): Show[T, A And B] =
     new Show[T, A And B] {
-      override def show(t: T): String = s"(${sa.show(t)} && ${sb.show(t)}})"
+      override def show(t: T): String = s"(${sa.show(t)} && ${sb.show(t)})"
     }
 }
 

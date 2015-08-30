@@ -10,6 +10,10 @@ class CharValidatorSpec extends Properties("CharValidator") {
     Validator[Char, Digit].get.isValid(c) ?= c.isDigit
   }
 
+  property("Letter.isValid") = forAll { (c: Char) =>
+    Validator[Char, Letter].get.isValid(c) ?= c.isLetter
+  }
+
   property("LowerCase.isValid") = forAll { (c: Char) =>
     Validator[Char, LowerCase].get.isValid(c) ?= c.isLower
   }

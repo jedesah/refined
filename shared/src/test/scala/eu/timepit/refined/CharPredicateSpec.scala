@@ -11,6 +11,10 @@ class CharPredicateSpec extends Properties("CharPredicate") {
     Predicate[Digit, Char].show('c') ?= "isDigit('c')"
   }
 
+  property("Letter.show") = secure {
+    Predicate[Letter, Char].show('c') ?= "isLetter('c')"
+  }
+
   property("LowerCase.show") = secure {
     Predicate[LowerCase, Char].show('c') ?= "isLower('c')"
   }

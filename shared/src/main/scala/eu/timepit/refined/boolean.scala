@@ -156,6 +156,14 @@ private[refined] trait BooleanValidators {
     }
 }
 
+private[refined] trait BooleanShows {
+
+  implicit def andShow[T, A, B](implicit sa: Show[T, A], sb: Show[T, B]): Show[T, A And B] =
+    new Show[T, A And B] {
+      override def show(t: T): String = s"(${sa.show(t)} && ${sb.show(t)}})"
+    }
+}
+
 private[refined] trait BooleanInferenceRules0 extends BooleanInferenceRules1 {
 
   implicit def minimalTautology[A]: A ==> A =

@@ -3,7 +3,7 @@ package eu.timepit.refined
 import eu.timepit.refined.boolean.Or
 import eu.timepit.refined.char._
 
-object char extends CharValidators {
+object char extends CharValidators with CharShows {
 
   /** Predicate that checks if a `Char` is a digit. */
   case class Digit()
@@ -40,4 +40,17 @@ private[refined] trait CharValidators {
 
   implicit def whitespaceValidator: Validator.Flat[Char, Whitespace] =
     Validator.fromPredicate(_.isWhitespace, Whitespace())
+}
+
+private[refined] trait CharShows {
+
+  implicit def digitShow: Show[Char, Digit] =
+    new Show[Char, Digit] {
+      override def show(t: Char): String = s"isDigit('$t')"
+    }
+
+  implicit def letterShow: Show[Char, Letter] =
+    new Show[Char, Letter] {
+      override def show(t: Char): String = s"isLetter('$t')"
+    }
 }

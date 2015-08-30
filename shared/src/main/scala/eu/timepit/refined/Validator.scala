@@ -1,5 +1,7 @@
 package eu.timepit.refined
 
+
+
 /**
  * Type class for validating values of type `T` according to a type-level
  * predicate `P`. The semantics of `P` are defined by the instance(s) of
@@ -39,7 +41,14 @@ object Validator {
 
   def apply[T, P]: ValidatorAux[T, P] = new ValidatorAux[T, P]
 
-  class ValidatorAux[T, P] {
+  /**
+   * Helper class that allows the type `R` to be inferred from calls like
+   * `[[Validator]][T, P].get`.
+   *
+   * See [[http://tpolecat.github.io/2015/07/30/infer.html]] for a detailed
+   * explanation of this trick.
+   */
+  final class ValidatorAux[T, P] {
     def get[R](implicit v: Validator[T, P, R]): Validator[T, P, R] = v
   }
 

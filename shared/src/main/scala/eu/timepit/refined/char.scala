@@ -44,13 +44,13 @@ private[refined] trait CharValidators {
 
 private[refined] trait CharShows {
 
-  implicit def digitShow: Show[Char, Digit] =
-    new Show[Char, Digit] {
+  implicit def digitShow: Show[Char, Digit, Digit] =
+    new Show[Char, Digit, Digit] {
       override def show(t: Char): String = s"isDigit('$t')"
     }
 
-  implicit def letterShow: Show[Char, Letter] =
-    new Show[Char, Letter] {
+  implicit def letterShow: Show[Char, Letter, Letter] =
+    new Show[Char, Letter, Letter] {
       override def show(t: Char): String = s"isLetter('$t')"
     }
 }

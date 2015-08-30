@@ -26,8 +26,11 @@ sealed abstract class Result[T, P] extends Product with Serializable {
   def isFailed: Boolean =
     fold((_, _) => false, (_, _) => true)
 
-  def show(implicit s: Show[T, P]): String =
+  def show[R](implicit s: Show[T, P, R]): String =
     s.show(value)
+
+  def showRes[R](implicit s: Show[T, P, P]): String =
+    s.showResult(this)
 }
 
 object Result {
@@ -39,8 +42,9 @@ object Result {
     if (b) Passed(t, p) else Failed(t, p)
 
 
-  implicit def showResult[T, P](implicit sa: Show[T, P]): Show[T, Result[T, P]] =
-    new Show[T, Result[T, P]] {
+  implicit def showResult[T, P, R](implicit sa: Show[T, P, R]): Show[T, Result[T, P], R] =
+    new Show[T, Result[T, P], R] {
       override def show(t: T): String = sa.show(t)
+      override def showResult(r: Res): String = "res: " + sa.showResult(r)
     }
 }

@@ -158,9 +158,19 @@ private[refined] trait BooleanValidators {
 
 private[refined] trait BooleanShows {
 
-  implicit def andShow[T, A, B](implicit sa: Show[T, A], sb: Show[T, B]): Show[T, A And B] =
-    new Show[T, A And B] {
+
+  implicit def andShow[T, A, B, RA, RB](implicit sa: Show[T, A, RA], sb: Show[T, B, RB]): Show[T, A And B, sa.Res And sb.Res] =
+    new Show[T, A And B, sa.Res And sb.Res] {
       override def show(t: T): String = s"(${sa.show(t)} && ${sb.show(t)})"
+
+      override def showResult(r: Res): String =
+        (r.predicate.a, r.predicate.b) match {
+          case (Passed(_, _), Passed(_, _)) => "left and right passed"
+          case (lr @ Failed(_, _), rr @ Failed(_, _)) =>
+            s"Both predicates of ${show(r.value)} failed. Left: ${sa.showResult(lr)} Right: ${sb.showResult(rr)}"
+          case (Passed(_,_), _) => "left passed"
+          case (_, Passed(_,_)) => "right passed"
+        }
     }
 }
 

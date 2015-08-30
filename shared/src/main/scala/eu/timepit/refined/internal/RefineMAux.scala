@@ -1,6 +1,8 @@
 package eu.timepit.refined
 package internal
 
+import eu.timepit.refined.Result.Passed
+
 import scala.reflect.macros.blackbox
 
 /**

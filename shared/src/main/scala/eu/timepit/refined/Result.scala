@@ -1,6 +1,8 @@
 package eu.timepit.refined
 
-sealed trait Result[T, P] extends Product with Serializable {
+import eu.timepit.refined.Result.{Failed, Passed}
+
+sealed abstract class Result[T, P] extends Product with Serializable {
 
   def value: T
 
@@ -25,10 +27,10 @@ sealed trait Result[T, P] extends Product with Serializable {
     fold((_, _) => false, (_, _) => true)
 }
 
-case class Passed[T, P](value: T, predicate: P) extends Result[T, P]
-case class Failed[T, P](value: T, predicate: P) extends Result[T, P]
-
 object Result {
+
+  final case class Passed[T, P](value: T, predicate: P) extends Result[T, P]
+  final case class Failed[T, P](value: T, predicate: P) extends Result[T, P]
 
   def fromBoolean[T, P](b: Boolean, t: T, p: P): Result[T, P] =
     if (b) Passed(t, p) else Failed(t, p)

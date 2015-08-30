@@ -1,6 +1,8 @@
 package eu.timepit.refined
 package internal
 
+import eu.timepit.refined.Result.Passed
+
 /**
  * Helper class that allows the type `T` to be inferred from calls like
  * `[[RefType.refine]][P](t)`.

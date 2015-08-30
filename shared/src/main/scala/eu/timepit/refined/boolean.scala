@@ -1,6 +1,7 @@
 package eu.timepit.refined
 
 import eu.timepit.refined.InferenceRule.==>
+import eu.timepit.refined.Result.{Failed, Passed}
 import eu.timepit.refined.boolean._
 import shapeless.ops.hlist.ToList
 import shapeless.{::, HList, HNil}

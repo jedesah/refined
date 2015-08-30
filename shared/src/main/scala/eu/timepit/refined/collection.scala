@@ -1,6 +1,7 @@
 package eu.timepit.refined
 
 import eu.timepit.refined.InferenceRule.==>
+import eu.timepit.refined.Result.Failed
 import eu.timepit.refined.boolean.Not
 import eu.timepit.refined.collection._
 import eu.timepit.refined.generic.Equal

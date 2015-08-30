@@ -55,7 +55,7 @@ object Validator {
     instance(validateFun, constant = true)
 
   def fromPredicate[T, P](f: T => Boolean, p: P): Validator.Flat[T, P] =
-    instance(t => if (f(t)) Passed(t, p) else Failed(t, p))
+    instance(t => Result.fromBoolean(f(t), t, p))
 
   /**
    * Constructs a [[Validator]] from the partial function `pf`. All values of

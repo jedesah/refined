@@ -1,6 +1,7 @@
 package eu.timepit.refined
 
 import eu.timepit.refined.InferenceRule.==>
+import eu.timepit.refined.Result.Passed
 import eu.timepit.refined.generic._
 import shapeless.ops.coproduct.ToHList
 import shapeless.ops.hlist.ToList

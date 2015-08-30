@@ -37,10 +37,10 @@ object boolean extends BooleanValidators with BooleanInferenceRules0 {
 
 private[refined] trait BooleanValidators {
 
-  implicit def trueValidator[T]: Validator[T, True, True] =
+  implicit def trueValidator[T]: Validator.Flat[T, True] =
     Validator.constant(t => Passed(t, True()))
 
-  implicit def falseValidator[T]: Validator[T, False, False] =
+  implicit def falseValidator[T]: Validator.Flat[T, False] =
     Validator.constant(t => Failed(t, False()))
 
   implicit def notValidator[T, P, R](implicit v: Validator[T, P, R]): Validator[T, Not[P], Not[v.Res]] =

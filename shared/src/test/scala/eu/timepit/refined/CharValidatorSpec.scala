@@ -21,4 +21,8 @@ class CharValidatorSpec extends Properties("CharValidator") {
   property("UpperCase.isValid") = forAll { (c: Char) =>
     Validator[Char, UpperCase].get.isValid(c) ?= c.isUpper
   }
+
+  property("Whitespace.isValid") = forAll { (c: Char) =>
+    Validator[Char, Whitespace].get.isValid(c) ?= c.isWhitespace
+  }
 }

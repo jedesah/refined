@@ -3,7 +3,7 @@ package eu.timepit.refined
 import eu.timepit.refined.boolean.Or
 import eu.timepit.refined.char._
 
-object char extends CharValidators with CharShows {
+object char extends CharValidatorInstances with CharShowInstances {
 
   /** Predicate that checks if a `Char` is a digit. */
   case class Digit()
@@ -24,7 +24,7 @@ object char extends CharValidators with CharShows {
   type LetterOrDigit = Letter Or Digit
 }
 
-private[refined] trait CharValidators {
+private[refined] trait CharValidatorInstances {
 
   implicit def digitValidator: Validator.Flat[Char, Digit] =
     Validator.fromPredicate(_.isDigit, Digit())
@@ -42,15 +42,20 @@ private[refined] trait CharValidators {
     Validator.fromPredicate(_.isWhitespace, Whitespace())
 }
 
-private[refined] trait CharShows {
+private[refined] trait CharShowInstances {
 
-  implicit def digitShow: Show[Char, Digit, Digit] =
-    new Show[Char, Digit, Digit] {
-      override def show(t: Char): String = s"isDigit('$t')"
-    }
+  implicit def digitShow: Show.Flat[Char, Digit] =
+    Show.instance(t => s"isDigit('$t')")
 
-  implicit def letterShow: Show[Char, Letter, Letter] =
-    new Show[Char, Letter, Letter] {
-      override def show(t: Char): String = s"isLetter('$t')"
-    }
+  implicit def letterShow: Show.Flat[Char, Letter] =
+    Show.instance(t => s"isLetter('$t')")
+
+  implicit def lowerCaseShow: Show.Flat[Char, LowerCase] =
+    Show.instance(t => s"isLower('$t')")
+
+  implicit def upperCaseShow: Show.Flat[Char, UpperCase] =
+    Show.instance(t => s"isUpper('$t')")
+
+  implicit def whitespaceShow: Show.Flat[Char, Whitespace] =
+    Show.instance(t => s"isWhitespace('$t')")
 }

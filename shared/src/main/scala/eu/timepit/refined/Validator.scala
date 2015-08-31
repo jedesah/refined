@@ -1,7 +1,5 @@
 package eu.timepit.refined
 
-
-
 /**
  * Type class for validating values of type `T` according to a type-level
  * predicate `P`. The semantics of `P` are defined by the instance(s) of
@@ -39,7 +37,7 @@ object Validator {
 
   type Flat[T, P] = Validator[T, P, P]
 
-  def apply[T, P]: ValidatorAux[T, P] = new ValidatorAux[T, P]
+  def apply[T, P]: ValidatorAux[T, P] = new ValidatorAux
 
   /**
    * Helper class that allows the type `R` to be inferred from calls like

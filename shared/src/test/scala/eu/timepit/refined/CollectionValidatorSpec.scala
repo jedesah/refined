@@ -10,8 +10,8 @@ import shapeless.nat._
 
 class CollectionValidatorSpec extends Properties("CollectionValidator") {
 
-  property("Contains[W.`0`.T].isValid") = forAll { (l: List[Int]) =>
-    Validator[List[Int], Contains[W.`0`.T]].get.isValid(l) ?= l.contains(0)
+  property("Contains[W.`1`.T].isValid") = forAll { (l: List[Int]) =>
+    Validator[List[Int], Contains[W.`1`.T]].get.isValid(l) ?= l.contains(1)
   }
 
   property("Count[LowerCase, Greater[_2]].isValid") = forAll { (l: List[Char]) =>

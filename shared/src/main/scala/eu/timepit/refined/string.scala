@@ -4,7 +4,7 @@ import eu.timepit.refined.InferenceRule.==>
 import eu.timepit.refined.string._
 import shapeless.Witness
 
-object string extends StringValidators with StringInferenceRules {
+object string extends StringValidators with StringShowInstances with StringInferenceRules {
 
   /** Predicate that checks if a `String` ends with the suffix `S`. */
   case class EndsWith[S](s: S)
@@ -62,6 +62,15 @@ private[refined] trait StringValidators {
 
   implicit def xpathValidator: Validator.Flat[String, XPath] =
     Validator.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, XPath())
+}
+
+private[refined] trait StringShowInstances {
+
+  implicit def endsWithShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, EndsWith[S]] =
+    Show.instance(t => s""""$t".endsWith("${ws.value}")""")
+
+  implicit def startsWithShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, StartsWith[S]] =
+    Show.instance(t => s""""$t".startsWith("${ws.value}")""")
 }
 
 private[refined] trait StringInferenceRules {

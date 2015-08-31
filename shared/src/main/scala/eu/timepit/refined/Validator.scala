@@ -61,6 +61,10 @@ object Validator {
   def constant[T, P, R](validateFun: T => Result[T, R]): Validator[T, P, R] =
     instance(validateFun, constant = true)
 
+  /**
+   * Constructs a [[Validator]] from the predicate `f`. All values of type
+   * `T` for which `f` returns `true` are considered valid according to `P`.
+   */
   def fromPredicate[T, P](f: T => Boolean, p: P): Validator.Flat[T, P] =
     instance(t => Result.fromBoolean(f(t), t, p))
 

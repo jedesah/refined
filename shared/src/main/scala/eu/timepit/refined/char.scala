@@ -3,7 +3,7 @@ package eu.timepit.refined
 import eu.timepit.refined.boolean.Or
 import eu.timepit.refined.char._
 
-object char extends CharValidatorInstances with CharShowInstances {
+object char extends CharValidators with CharShowInstances {
 
   /** Predicate that checks if a `Char` is a digit. */
   case class Digit()
@@ -24,7 +24,7 @@ object char extends CharValidatorInstances with CharShowInstances {
   type LetterOrDigit = Letter Or Digit
 }
 
-private[refined] trait CharValidatorInstances {
+private[refined] trait CharValidators {
 
   implicit def digitValidator: Validator.Flat[Char, Digit] =
     Validator.fromPredicate(_.isDigit, Digit())

@@ -15,5 +15,5 @@ object MacroUtils {
   }
 
   def tryN[T](n: Int, t: => T): T =
-    Stream.fill(n)(Try(t)).collect { case Success(r) => r }.headOption.getOrElse(t)
+    Stream.fill(n)(Try(t)).map(x => { println(x); x }).collect { case Success(r) => r }.headOption.getOrElse(t)
 }

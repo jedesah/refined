@@ -19,7 +19,7 @@ final class RefineMAux[F[_, _], P] {
 
 object RefineMAux {
 
-  def macroImpl[F[_, _], T: c.WeakTypeTag, P: c.WeakTypeTag, R: c.WeakTypeTag](c: blackbox.Context)(t: c.Expr[T])(
+  def macroImpl[F[_, _], T: c.WeakTypeTag, P: c.WeakTypeTag, R](c: blackbox.Context)(t: c.Expr[T])(
     v: c.Expr[Validator[T, P, R]], rt: c.Expr[RefType[F]]
   ): c.Expr[F[T, P]] = {
     import c.universe._

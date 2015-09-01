@@ -7,13 +7,23 @@ import scala.util.{Success, Try}
 object MacroUtils {
 
   def eval[T](c: blackbox.Context)(t: c.Expr[T]): T = {
+    println("eval begin")
     val expr = c.Expr[T](c.untypecheck(t.tree))
 
     // Try evaluating expr twice before failing, see
     // https://github.com/fthomas/refined/issues/3
     tryN(2, c.eval(expr))
+    println("eval end")
   }
 
-  def tryN[T](n: Int, t: => T): T =
-    Stream.fill(n)(Try(t)).map(x => { println(x); x }).collect { case Success(r) => r }.headOption.getOrElse(t)
+  def tryN[T](n: Int, t: => T): T = {
+    println("tryN begin")
+
+    val rr =  Stream.fill(n)(Try(t)).map(x => {
+      println(x); x
+    }).collect { case Success(r) => r }.headOption.getOrElse(t)
+
+    println("tryN end")
+    rr
+  }
 }

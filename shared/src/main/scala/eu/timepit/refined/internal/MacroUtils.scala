@@ -12,8 +12,9 @@ object MacroUtils {
 
     // Try evaluating expr twice before failing, see
     // https://github.com/fthomas/refined/issues/3
-    tryN(2, c.eval(expr))
+    val r = tryN(2, c.eval(expr))
     println("eval end")
+    r
   }
 
   def tryN[T](n: Int, t: => T): T = {

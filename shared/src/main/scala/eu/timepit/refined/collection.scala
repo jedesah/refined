@@ -93,7 +93,7 @@ private[refined] trait CollectionValidators {
   implicit def emptyValidator[T](implicit ev: T => TraversableOnce[_]): Validator.Flat[T, Empty] =
     Validator.fromPredicate(_.isEmpty, Empty())
 
-  implicit def forallValidator[A, P, R, T[A] <: TraversableOnce[A]](
+  implicit def forallValidator[A, P, R, T[a] <: TraversableOnce[a]](
     implicit
     v: Validator[A, P, R]
   ): Validator[T[A], Forall[P], Forall[List[v.Res]]] =
@@ -108,7 +108,7 @@ private[refined] trait CollectionValidators {
   ): Validator[T, Forall[P], Forall[List[v.Res]]] =
     forallValidator.contramap(ev)
 
-  implicit def headValidator[A, P, R, T[A] <: Traversable[A]](
+  implicit def headValidator[A, P, R, T[a] <: Traversable[a]](
     implicit
     v: Validator[A, P, R]
   ): Validator[T[A], Head[P], Head[Option[v.Res]]] =
@@ -138,7 +138,7 @@ private[refined] trait CollectionValidators {
       case None => Failed(t, Index(wn.value, None))
     })
 
-  implicit def lastValidator[A, P, R, T[A] <: Traversable[A]](
+  implicit def lastValidator[A, P, R, T[a] <: Traversable[a]](
     implicit
     v: Validator[A, P, R]
   ): Validator[T[A], Last[P], Last[Option[v.Res]]] =

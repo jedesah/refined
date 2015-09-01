@@ -7,9 +7,11 @@ import scala.util.{Success, Try}
 object MacroUtils {
 
   def eval[T](c: blackbox.Context)(t: c.Expr[T]): T = {
+    import c.universe._
     println("eval begin")
+    println("t: " + showRaw(t))
     val expr = c.Expr[T](c.untypecheck(t.tree))
-
+    println("expr: " + showRaw(expr))
     // Try evaluating expr twice before failing, see
     // https://github.com/fthomas/refined/issues/3
     val r = tryN(2, c.eval(expr))

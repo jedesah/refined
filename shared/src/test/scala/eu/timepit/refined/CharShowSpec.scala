@@ -7,22 +7,22 @@ import org.scalacheck.Properties
 class CharShowSpec extends Properties("CharShow") {
 
   property("Digit.show") = secure {
-    Show[Char, Digit].get.show('c') ?= "isDigit('c')"
+    Show[Char, Digit].get.showExpr('c') ?= "isDigit('c')"
   }
 
   property("Letter.show") = secure {
-    Show[Char, Letter].get.show('c') ?= "isLetter('c')"
+    Show[Char, Letter].get.showExpr('c') ?= "isLetter('c')"
   }
 
   property("LowerCase.show") = secure {
-    Show[Char, LowerCase].get.show('c') ?= "isLower('c')"
+    Show[Char, LowerCase].get.showExpr('c') ?= "isLower('c')"
   }
 
   property("UpperCase.show") = secure {
-    Show[Char, UpperCase].get.show('c') ?= "isUpper('c')"
+    Show[Char, UpperCase].get.showExpr('c') ?= "isUpper('c')"
   }
 
   property("Whitespace.show") = secure {
-    Show[Char, Whitespace].get.show('c') ?= "isWhitespace('c')"
+    Show[Char, Whitespace].get.showExpr('c') ?= "isWhitespace('c')"
   }
 }

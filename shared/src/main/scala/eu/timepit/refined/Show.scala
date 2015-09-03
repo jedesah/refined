@@ -1,12 +1,18 @@
 package eu.timepit.refined
 
+import eu.timepit.refined.Result.{Failed, Passed}
+
 trait Show[T, P, R] extends Serializable {
 
   final type Res = Result[T, R]
 
-  def show(t: T): String
+  def showExpr(t: T): String
 
-  def showResult(r: Res): String = "res: " + show(r.value)
+  def showResult(r: Res): String =
+    r match {
+      case Passed(t, _) => s"Predicate passed: ${showExpr(t)}."
+      case Failed(t, _) => s"Predicate failed: ${showExpr(t)}."
+    }
 }
 
 object Show {
@@ -21,6 +27,6 @@ object Show {
 
   def instance[T, P, R](f: T => String): Show[T, P, R] =
     new Show[T, P, R] {
-      override def show(t: T): String = f(t)
+      override def showExpr(t: T): String = f(t)
     }
 }

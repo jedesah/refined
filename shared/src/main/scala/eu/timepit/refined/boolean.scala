@@ -6,7 +6,7 @@ import eu.timepit.refined.boolean._
 import shapeless.ops.hlist.ToList
 import shapeless.{::, HList, HNil}
 
-object boolean extends BooleanValidators with BooleanInferenceRules0 with BooleanShowInstances {
+object boolean extends BooleanValidators with BooleanShowInstances with BooleanInferenceRules0 {
 
   /** Constant predicate that is always `true`. */
   case class True()
@@ -164,23 +164,38 @@ private[refined] trait BooleanShowInstances {
   implicit def falseShow[T]: Show.Flat[T, False] =
     Show.instance(_ => "false")
 
-  implicit def andShow[T, A, B, RA, RB](implicit sa: Show[T, A, RA], sb: Show[T, B, RB]): Show[T, A And B, sa.Res And sb.Res] =
+  implicit def notShow[T, P, R](implicit s: Show[T, P, R]): Show[T, Not[P], Not[s.Res]] =
+    new Show[T, Not[P], Not[s.Res]] {
+      override def showExpr(t: T): String = s"!${s.showExpr(t)}"
+
+      override def showResult(r: Res): String =
+        r match {
+          case Passed(t, _) => s"Predicate ${showExpr(t)} did not fail."
+          case Failed(t, _) => s"Predicate ${showExpr(t)} did not pass."
+        }
+    }
+
+  implicit def andShow[T, A, B, RA, RB](
+    implicit
+    sa: Show[T, A, RA], sb: Show[T, B, RB]
+  ): Show[T, A And B, sa.Res And sb.Res] =
     new Show[T, A And B, sa.Res And sb.Res] {
-      override def show(t: T): String = s"(${sa.show(t)} && ${sb.show(t)})"
+      override def showExpr(t: T): String = s"(${sa.showExpr(t)} && ${sb.showExpr(t)})"
 
       override def showResult(r: Res): String = {
+        val expr = showExpr(r.value)
         (r.predicate.a, r.predicate.b) match {
           case (Passed(_, _), Passed(_, _)) =>
-            s"Both predicates of ${show(r.value)} passed."
+            s"Both predicates of $expr passed."
 
-          case (ar@Failed(_, _), br@Failed(_, _)) =>
-            s"Both predicates of ${show(r.value)} failed. Left: ${sa.showResult(ar)} Right: ${sb.showResult(br)}"
+          case (ar @ Failed(_, _), br @ Failed(_, _)) =>
+            s"Both predicates of $expr failed. Left: ${sa.showResult(ar)} Right: ${sb.showResult(br)}"
 
-          case (ar@Failed(_, _), _) =>
-            s"Left predicate of ${show(r.value)} failed: ${sa.showResult(ar)}"
+          case (ar @ Failed(_, _), _) =>
+            s"Left predicate of $expr failed: ${sa.showResult(ar)}"
 
-          case (_, br@Failed(_, _)) =>
-            s"Right predicate of ${show(r.value)} failed: ${sb.showResult(br)}"
+          case (_, br @ Failed(_, _)) =>
+            s"Right predicate of $expr failed: ${sb.showResult(br)}"
         }
       }
     }

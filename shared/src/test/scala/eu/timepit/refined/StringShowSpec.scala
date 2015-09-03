@@ -47,11 +47,11 @@ class StringShowSpec extends Properties("StringShow") {
 */
 
   property("EndsWith[S].show") = secure {
-    Show[String, EndsWith[W.`"cd"`.T]].get.show("abcd") ?= """"abcd".endsWith("cd")"""
+    Show[String, EndsWith[W.`"cd"`.T]].get.showExpr("abcd") ?= """"abcd".endsWith("cd")"""
   }
 
   property("StartsWith[S].show") = secure {
-    Show[String, StartsWith[W.`"ab"`.T]].get.show("abcd") ?= """"abcd".startsWith("ab")"""
+    Show[String, StartsWith[W.`"ab"`.T]].get.showExpr("abcd") ?= """"abcd".startsWith("ab")"""
   }
 
   /*

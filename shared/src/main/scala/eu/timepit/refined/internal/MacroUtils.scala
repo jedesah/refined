@@ -22,7 +22,7 @@ object MacroUtils {
   def tryN[T](n: Int, t: => T): T = {
     println("tryN begin")
 
-    val rr =  Stream.fill(n)(Try(t)).map(x => {
+    val rr = Stream.fill(n)(Try(t)).map(x => {
       println(x); x
     }).collect { case Success(r) => r }.headOption.getOrElse(t)
 

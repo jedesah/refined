@@ -6,7 +6,7 @@ import eu.timepit.refined.boolean._
 import shapeless.ops.hlist.ToList
 import shapeless.{::, HList, HNil}
 
-object boolean extends BooleanValidators with BooleanInferenceRules0 with BooleanShows {
+object boolean extends BooleanValidators with BooleanInferenceRules0 with BooleanShowInstances {
 
   /** Constant predicate that is always `true`. */
   case class True()
@@ -156,20 +156,33 @@ private[refined] trait BooleanValidators {
     }
 }
 
-private[refined] trait BooleanShows {
+private[refined] trait BooleanShowInstances {
+
+  implicit def trueShow[T]: Show.Flat[T, True] =
+    Show.instance(_ => "true")
+
+  implicit def falseShow[T]: Show.Flat[T, False] =
+    Show.instance(_ => "false")
 
   implicit def andShow[T, A, B, RA, RB](implicit sa: Show[T, A, RA], sb: Show[T, B, RB]): Show[T, A And B, sa.Res And sb.Res] =
     new Show[T, A And B, sa.Res And sb.Res] {
       override def show(t: T): String = s"(${sa.show(t)} && ${sb.show(t)})"
 
-      override def showResult(r: Res): String =
+      override def showResult(r: Res): String = {
         (r.predicate.a, r.predicate.b) match {
-          case (Passed(_, _), Passed(_, _)) => "left and right passed"
-          case (lr @ Failed(_, _), rr @ Failed(_, _)) =>
-            s"Both predicates of ${show(r.value)} failed. Left: ${sa.showResult(lr)} Right: ${sb.showResult(rr)}"
-          case (Passed(_, _), _) => "left passed"
-          case (_, Passed(_, _)) => "right passed"
+          case (Passed(_, _), Passed(_, _)) =>
+            s"Both predicates of ${show(r.value)} passed."
+
+          case (ar@Failed(_, _), br@Failed(_, _)) =>
+            s"Both predicates of ${show(r.value)} failed. Left: ${sa.showResult(ar)} Right: ${sb.showResult(br)}"
+
+          case (ar@Failed(_, _), _) =>
+            s"Left predicate of ${show(r.value)} failed: ${sa.showResult(ar)}"
+
+          case (_, br@Failed(_, _)) =>
+            s"Right predicate of ${show(r.value)} failed: ${sb.showResult(br)}"
         }
+      }
     }
 }
 

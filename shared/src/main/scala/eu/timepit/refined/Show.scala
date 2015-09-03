@@ -6,7 +6,7 @@ trait Show[T, P, R] extends Serializable {
 
   def show(t: T): String
 
-  def showResult(r: Res): String = show(r.value)
+  def showResult(r: Res): String = "res: " + show(r.value)
 }
 
 object Show {

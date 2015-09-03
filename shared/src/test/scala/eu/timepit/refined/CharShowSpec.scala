@@ -1,28 +1,29 @@
 package eu.timepit.refined
 
+import eu.timepit.refined.TestUtils._
 import eu.timepit.refined.char._
 import org.scalacheck.Prop._
 import org.scalacheck.Properties
 
 class CharShowSpec extends Properties("CharShow") {
 
-  property("Digit.show") = secure {
-    Show[Char, Digit].get.showExpr('c') ?= "isDigit('c')"
+  property("Digit.showExpr") = secure {
+    showExpr[Digit]('c') ?= "isDigit('c')"
   }
 
-  property("Letter.show") = secure {
-    Show[Char, Letter].get.showExpr('c') ?= "isLetter('c')"
+  property("Letter.showExpr") = secure {
+    showExpr[Letter]('c') ?= "isLetter('c')"
   }
 
-  property("LowerCase.show") = secure {
-    Show[Char, LowerCase].get.showExpr('c') ?= "isLower('c')"
+  property("LowerCase.showExpr") = secure {
+    showExpr[LowerCase]('c') ?= "isLower('c')"
   }
 
-  property("UpperCase.show") = secure {
-    Show[Char, UpperCase].get.showExpr('c') ?= "isUpper('c')"
+  property("UpperCase.showExpr") = secure {
+    showExpr[UpperCase]('c') ?= "isUpper('c')"
   }
 
-  property("Whitespace.show") = secure {
-    Show[Char, Whitespace].get.showExpr('c') ?= "isWhitespace('c')"
+  property("Whitespace.showExpr") = secure {
+    showExpr[Whitespace]('c') ?= "isWhitespace('c')"
   }
 }

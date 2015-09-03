@@ -8,6 +8,7 @@ import eu.timepit.refined.string._
 import org.scalacheck.Prop._
 import org.scalacheck.Properties
 import shapeless.nat._
+import TestUtils._
 
 class StringShowSpec extends Properties("StringShow") {
 
@@ -47,11 +48,11 @@ class StringShowSpec extends Properties("StringShow") {
 */
 
   property("EndsWith[S].show") = secure {
-    Show[String, EndsWith[W.`"cd"`.T]].get.showExpr("abcd") ?= """"abcd".endsWith("cd")"""
+    showExpr[EndsWith[W.`"cd"`.T]]("abcd") ?= """"abcd".endsWith("cd")"""
   }
 
   property("StartsWith[S].show") = secure {
-    Show[String, StartsWith[W.`"ab"`.T]].get.showExpr("abcd") ?= """"abcd".startsWith("ab")"""
+    showExpr[StartsWith[W.`"ab"`.T]]("abcd") ?= """"abcd".startsWith("ab")"""
   }
 
   /*

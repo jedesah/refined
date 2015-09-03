@@ -20,29 +20,12 @@ class BooleanPredicateSpec extends Properties("BooleanPredicate") {
     Predicate[True, Unit].isValid(())
   }
 
-  property("True.show") = secure {
-    Predicate[True, Unit].show(()) ?= "true"
-  }
-
   property("Not[True].isValid") = secure {
     Predicate[Not[True], Unit].notValid(())
   }
 
-  property("Not[True].show") = secure {
-    Predicate[Not[True], Unit].show(()) ?= "!true"
-  }
-
-  property("Not.consistent") = secure {
-    consistent(Predicate[Not[True], Unit])(()) &&
-      consistent(Predicate[Not[False], Unit])(())
-  }
-
   property("False.isValid") = secure {
     Predicate[False, Unit].notValid(())
-  }
-
-  property("False.show") = secure {
-    Predicate[False, Unit].show(()) ?= "false"
   }
 
   property("Not[False].isValid") = secure {
@@ -56,13 +39,6 @@ class BooleanPredicateSpec extends Properties("BooleanPredicate") {
       Predicate[TT[And], Unit].isValid(())
   }
 
-  property("And.consistent") = secure {
-    consistent(Predicate[FF[And], Unit])(()) &&
-      consistent(Predicate[FT[And], Unit])(()) &&
-      consistent(Predicate[TF[And], Unit])(()) &&
-      consistent(Predicate[TT[And], Unit])(())
-  }
-
   property("And.show") = secure {
     Predicate[TF[And], Unit].show(()) ?= "(true && false)"
   }
@@ -74,13 +50,6 @@ class BooleanPredicateSpec extends Properties("BooleanPredicate") {
       Predicate[TT[Or], Unit].isValid(())
   }
 
-  property("Or.consistent") = secure {
-    consistent(Predicate[FF[Or], Unit])(()) &&
-      consistent(Predicate[FT[Or], Unit])(()) &&
-      consistent(Predicate[TF[Or], Unit])(()) &&
-      consistent(Predicate[TT[Or], Unit])(())
-  }
-
   property("Or.show") = secure {
     Predicate[TF[Or], Unit].show(()) ?= "(true || false)"
   }
@@ -90,13 +59,6 @@ class BooleanPredicateSpec extends Properties("BooleanPredicate") {
       Predicate[FT[Xor], Unit].isValid(()) &&
       Predicate[TF[Xor], Unit].isValid(()) &&
       Predicate[TT[Xor], Unit].notValid(())
-  }
-
-  property("Xor.consistent") = secure {
-    consistent(Predicate[FF[Xor], Unit])(()) &&
-      consistent(Predicate[FT[Xor], Unit])(()) &&
-      consistent(Predicate[TF[Xor], Unit])(()) &&
-      consistent(Predicate[TT[Xor], Unit])(())
   }
 
   property("Xor.show") = secure {
@@ -131,10 +93,6 @@ class BooleanPredicateSpec extends Properties("BooleanPredicate") {
   property("OneOf[Digit :: LowerCase :: UpperCase :: HNil].show") = secure {
     Predicate[OneOf[Digit :: LowerCase :: UpperCase :: HNil], Char].show('c') ?=
       "oneOf(isDigit('c'), isLower('c'), isUpper('c'), false)"
-  }
-
-  property("OneOf[_].consistent") = forAll {
-    consistent(Predicate[OneOf[Digit :: LowerCase :: UpperCase :: HNil], Char])
   }
 
   property("OneOf[_].contramap(identity).accumulateIsValid") = forAll { (c: Char) =>

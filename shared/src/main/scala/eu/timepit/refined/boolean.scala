@@ -45,15 +45,13 @@ private[refined] trait BooleanValidators {
     Validator.constant(t => Failed(t, False()))
 
   implicit def notValidator[T, P, R](implicit v: Validator[T, P, R]): Validator[T, Not[P], Not[v.Res]] =
-    new Validator[T, Not[P], Not[v.Res]] {
-      override def validate(t: T): Res =
-        v.validate(t) match {
-          case r @ Passed(_, _) => Failed(t, Not(r))
-          case r @ Failed(_, _) => Passed(t, Not(r))
-        }
-
-      override val isConstant: Boolean = v.isConstant
-    }
+    Validator.instance(t => {
+      val r = v.validate(t)
+      r match {
+        case Passed(_, _) => Failed(t, Not(r))
+        case Failed(_, _) => Passed(t, Not(r))
+      }
+    }, constant = v.isConstant)
 
   implicit def andValidator[T, A, B, RA, RB](
     implicit
@@ -196,6 +194,49 @@ private[refined] trait BooleanShowInstances {
 
           case (_, br @ Failed(_, _)) =>
             s"Right predicate of $expr failed: ${sb.showResult(br)}"
+        }
+      }
+    }
+
+  implicit def orShow[T, A, B, RA, RB](
+    implicit
+    sa: Show[T, A, RA], sb: Show[T, B, RB]
+  ): Show[T, A Or B, sa.Res Or sb.Res] =
+    new Show[T, A Or B, sa.Res Or sb.Res] {
+      override def showExpr(t: T): String = s"(${sa.showExpr(t)} || ${sb.showExpr(t)})"
+
+      override def showResult(r: Res): String = {
+        val expr = showExpr(r.value)
+        (r.predicate.a, r.predicate.b) match {
+          case (Passed(_, _), Passed(_, _)) =>
+            s"Both predicates of $expr passed."
+
+          case (Passed(_, _), _) =>
+            s"Left predicate of $expr passed."
+
+          case (_, Passed(_, _)) =>
+            s"Right predicate of $expr passed."
+
+          case (ar @ Failed(_, _), br @ Failed(_, _)) =>
+            s"Both predicates of $expr failed. Left: ${sa.showResult(ar)} Right: ${sb.showResult(br)}"
+        }
+      }
+    }
+
+  implicit def xorShow[T, A, B, RA, RB](
+    implicit
+    sa: Show[T, A, RA], sb: Show[T, B, RB]
+  ): Show[T, A Xor B, sa.Res Xor sb.Res] =
+    new Show[T, A Xor B, sa.Res Xor sb.Res] {
+      override def showExpr(t: T): String = s"(${sa.showExpr(t)} ^ ${sb.showExpr(t)})"
+
+      override def showResult(r: Res): String = {
+        val expr = showExpr(r.value)
+        (r.predicate.a, r.predicate.b) match {
+          case (Passed(_, _), Passed(_, _)) => s"Both predicates of $expr passed."
+          case (ar @ Failed(_, _), br @ Failed(_, _)) => ""
+          case (Passed(_, _), _) => ""
+          case (_, Passed(_, _)) => ""
         }
       }
     }

@@ -39,19 +39,11 @@ class BooleanPredicateSpec extends Properties("BooleanPredicate") {
       Predicate[TT[And], Unit].isValid(())
   }
 
-  property("And.show") = secure {
-    Predicate[TF[And], Unit].show(()) ?= "(true && false)"
-  }
-
   property("Or.isValid") = secure {
     Predicate[FF[Or], Unit].notValid(()) &&
       Predicate[FT[Or], Unit].isValid(()) &&
       Predicate[TF[Or], Unit].isValid(()) &&
       Predicate[TT[Or], Unit].isValid(())
-  }
-
-  property("Or.show") = secure {
-    Predicate[TF[Or], Unit].show(()) ?= "(true || false)"
   }
 
   property("Xor.isValid") = secure {

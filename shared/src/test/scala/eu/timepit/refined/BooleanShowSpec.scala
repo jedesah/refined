@@ -26,4 +26,8 @@ class BooleanShowSpec extends Properties("BooleanShow") {
   property("And.showExpr") = secure {
     showExpr[And[True, False]](()) ?= "(true && false)"
   }
+
+  property("Or.showExpr") = secure {
+    showExpr[Or[True, False]](()) ?= "(true || false)"
+  }
 }

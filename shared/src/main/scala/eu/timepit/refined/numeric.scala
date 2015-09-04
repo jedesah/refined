@@ -27,7 +27,7 @@ import shapeless.{Nat, Witness}
  * res2: Double @@ Greater[W.`1.5`.T] = 1.6
  * }}}
  */
-object numeric extends NumericValidators with NumericInferenceRules {
+object numeric extends NumericValidators with NumericShowInstances with NumericInferenceRules {
 
   /** Predicate that checks if a numeric value is less than `N`. */
   case class Less[N](n: N)
@@ -59,42 +59,96 @@ object numeric extends NumericValidators with NumericInferenceRules {
 
 private[refined] trait NumericValidators {
 
-  implicit def lessValidator[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Validator.Flat[T, Less[N]] =
+  implicit def lessValidator[T, N <: T](
+    implicit
+    wn: Witness.Aux[N], nt: Numeric[T]
+  ): Validator.Flat[T, Less[N]] =
     Validator.fromPredicate(t => nt.lt(t, wn.value), Less(wn.value))
 
-  implicit def greaterValidator[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Validator.Flat[T, Greater[N]] =
+  implicit def greaterValidator[T, N <: T](
+    implicit
+    wn: Witness.Aux[N], nt: Numeric[T]
+  ): Validator.Flat[T, Greater[N]] =
     Validator.fromPredicate(t => nt.gt(t, wn.value), Greater(wn.value))
 
-  implicit def lessValidatorNat[N <: Nat, T](implicit tn: ToInt[N], wn: Witness.Aux[N], nt: Numeric[T]): Validator.Flat[T, Less[N]] =
+  implicit def lessValidatorNat[N <: Nat, T](
+    implicit
+    tn: ToInt[N], wn: Witness.Aux[N], nt: Numeric[T]
+  ): Validator.Flat[T, Less[N]] =
     Validator.fromPredicate(t => nt.toDouble(t) < tn(), Less(wn.value))
 
-  implicit def greaterValidatorNat[N <: Nat, T](implicit tn: ToInt[N], wn: Witness.Aux[N], nt: Numeric[T]): Validator.Flat[T, Greater[N]] =
+  implicit def greaterValidatorNat[N <: Nat, T](
+    implicit
+    tn: ToInt[N], wn: Witness.Aux[N], nt: Numeric[T]
+  ): Validator.Flat[T, Greater[N]] =
     Validator.fromPredicate(t => nt.toDouble(t) > tn(), Greater(wn.value))
 
-  implicit def equalValidatorNat[N <: Nat, T](implicit tn: ToInt[N], wn: Witness.Aux[N], nt: Numeric[T]): Validator.Flat[T, Equal[N]] =
+  implicit def equalValidatorNat[N <: Nat, T](
+    implicit
+    tn: ToInt[N], wn: Witness.Aux[N], nt: Numeric[T]
+  ): Validator.Flat[T, Equal[N]] =
     Validator.fromPredicate(t => nt.toDouble(t) == tn(), Equal(wn.value))
+}
+
+private[refined] trait NumericShowInstances {
+
+  implicit def lessShow[T, N <: T](implicit wn: Witness.Aux[N]): Show.Flat[T, Less[N]] =
+    Show.instance(t => s"($t < ${wn.value})")
+
+  implicit def greaterShow[T, N <: T](implicit wn: Witness.Aux[N]): Show.Flat[T, Greater[N]] =
+    Show.instance(t => s"($t > ${wn.value})")
+
+  implicit def lessShowNat[T, N <: Nat](implicit tn: ToInt[N]): Show.Flat[T, Less[N]] =
+    Show.instance(t => s"($t < ${tn()})")
+
+  implicit def greaterShowNat[T, N <: Nat](implicit tn: ToInt[N]): Show.Flat[T, Greater[N]] =
+    Show.instance(t => s"($t > ${tn()})")
+
+  implicit def equalShowNat[T, N <: Nat](implicit tn: ToInt[N]): Show.Flat[T, Equal[N]] =
+    Show.instance(t => s"($t == ${tn()})")
 }
 
 private[refined] trait NumericInferenceRules {
 
-  implicit def lessInferenceWit[C, A <: C, B <: C](implicit wa: Witness.Aux[A], wb: Witness.Aux[B], nc: Numeric[C]): Less[A] ==> Less[B] =
+  implicit def lessInferenceWit[C, A <: C, B <: C](
+    implicit
+    wa: Witness.Aux[A], wb: Witness.Aux[B], nc: Numeric[C]
+  ): Less[A] ==> Less[B] =
     InferenceRule(nc.lt(wa.value, wb.value), s"lessInferenceWit(${wa.value}, ${wb.value})")
 
-  implicit def greaterInferenceWit[C, A <: C, B <: C](implicit wa: Witness.Aux[A], wb: Witness.Aux[B], nc: Numeric[C]): Greater[A] ==> Greater[B] =
+  implicit def greaterInferenceWit[C, A <: C, B <: C](
+    implicit
+    wa: Witness.Aux[A], wb: Witness.Aux[B], nc: Numeric[C]
+  ): Greater[A] ==> Greater[B] =
     InferenceRule(nc.gt(wa.value, wb.value), s"greaterInferenceWit(${wa.value}, ${wb.value})")
 
-  implicit def lessInferenceNat[A <: Nat, B <: Nat](implicit ta: ToInt[A], tb: ToInt[B]): Less[A] ==> Less[B] =
+  implicit def lessInferenceNat[A <: Nat, B <: Nat](
+    implicit
+    ta: ToInt[A], tb: ToInt[B]
+  ): Less[A] ==> Less[B] =
     InferenceRule(ta() < tb(), s"lessInferenceNat(${ta()}, ${tb()})")
 
-  implicit def greaterInferenceNat[A <: Nat, B <: Nat](implicit ta: ToInt[A], tb: ToInt[B]): Greater[A] ==> Greater[B] =
+  implicit def greaterInferenceNat[A <: Nat, B <: Nat](
+    implicit
+    ta: ToInt[A], tb: ToInt[B]
+  ): Greater[A] ==> Greater[B] =
     InferenceRule(ta() > tb(), s"greaterInferenceNat(${ta()}, ${tb()})")
 
-  implicit def lessInferenceWitNat[C, A <: C, B <: Nat](implicit wa: Witness.Aux[A], tb: ToInt[B], nc: Numeric[C]): Less[A] ==> Less[B] =
+  implicit def lessInferenceWitNat[C, A <: C, B <: Nat](
+    implicit
+    wa: Witness.Aux[A], tb: ToInt[B], nc: Numeric[C]
+  ): Less[A] ==> Less[B] =
     InferenceRule(nc.lt(wa.value, nc.fromInt(tb())), s"lessInferenceWitNat(${wa.value}, ${tb()})")
 
-  implicit def greaterInferenceWitNat[C, A <: C, B <: Nat](implicit wa: Witness.Aux[A], tb: ToInt[B], nc: Numeric[C]): Greater[A] ==> Greater[B] =
+  implicit def greaterInferenceWitNat[C, A <: C, B <: Nat](
+    implicit
+    wa: Witness.Aux[A], tb: ToInt[B], nc: Numeric[C]
+  ): Greater[A] ==> Greater[B] =
     InferenceRule(nc.gt(wa.value, nc.fromInt(tb())), s"greaterInferenceWitNat(${wa.value}, ${tb()})")
 
-  implicit def equalValidatorInferenceNat[T, P, R, N <: Nat](implicit v: Validator[T, P, R], nt: Numeric[T], tn: ToInt[N]): Equal[N] ==> P =
+  implicit def equalValidatorInferenceNat[T, P, R, N <: Nat](
+    implicit
+    v: Validator[T, P, R], nt: Numeric[T], tn: ToInt[N]
+  ): Equal[N] ==> P =
     InferenceRule(v.isValid(nt.fromInt(tn())), s"equalValidatorInferenceNat(${nt.fromInt(tn())})")
 }

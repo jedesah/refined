@@ -36,7 +36,7 @@ object implicits {
    */
   implicit def autoRefineV[T, P, R](t: T)(
     implicit
-    v: Validator[T, P, R], rt: RefType[Refined]
+    v: Validator[T, P, R], s: Show[T, P, R], rt: RefType[Refined]
   ): Refined[T, P] = macro RefineMAux.macroImpl[Refined, T, P, R]
 
   /**
@@ -48,6 +48,6 @@ object implicits {
    */
   implicit def autoRefineT[T, P, R](t: T)(
     implicit
-    v: Validator[T, P, R], rt: RefType[@@]
+    v: Validator[T, P, R], s: Show[T, P, R], rt: RefType[@@]
   ): T @@ P = macro RefineMAux.macroImpl[@@, T, P, R]
 }

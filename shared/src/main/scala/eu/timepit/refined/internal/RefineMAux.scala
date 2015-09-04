@@ -14,13 +14,13 @@ import scala.reflect.macros.blackbox
  */
 final class RefineMAux[F[_, _], P] {
 
-  def apply[T, R](t: T)(implicit v: Validator[T, P, R], rt: RefType[F]): F[T, P] = macro RefineMAux.macroImpl[F, T, P, R]
+  def apply[T, R](t: T)(implicit v: Validator[T, P, R], s: Show[T, P, R], rt: RefType[F]): F[T, P] = macro RefineMAux.macroImpl[F, T, P, R]
 }
 
 object RefineMAux {
 
   def macroImpl[F[_, _], T: c.WeakTypeTag, P: c.WeakTypeTag, R](c: blackbox.Context)(t: c.Expr[T])(
-    v: c.Expr[Validator[T, P, R]], rt: c.Expr[RefType[F]]
+    v: c.Expr[Validator[T, P, R]], s: c.Expr[Show[T, P, R]], rt: c.Expr[RefType[F]]
   ): c.Expr[F[T, P]] = {
     import c.universe._
 
@@ -39,7 +39,9 @@ object RefineMAux {
       case Passed(_, _) =>
         val refType = MacroUtils.eval(c)(rt)
         refType.unsafeWrapM(c)(t)
-      case rv => c.abort(c.enclosingPosition, rv.toString) // TODO: use Show
+      case rv =>
+        val show = MacroUtils.eval(c)(s)
+        c.abort(c.enclosingPosition, show.showResult(rv))
     }
   }
 }

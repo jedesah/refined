@@ -8,7 +8,7 @@ import shapeless.ops.hlist.ToList
 import shapeless.ops.record.Keys
 import shapeless.{Coproduct, HList, LabelledGeneric, Witness}
 
-object generic extends GenericValidators with GenericInferenceRules {
+object generic extends GenericValidators with GenericShowInstances with GenericInferenceRules {
 
   /** Predicate that checks if a value is equal to `U`. */
   case class Equal[U](u: U)
@@ -71,6 +71,12 @@ private[refined] trait GenericValidators {
 
   implicit def supertypeValidator[T, U <: T]: Validator.Flat[T, Supertype[U]] =
     Validator.constant(t => Passed(t, Supertype()))
+}
+
+private[refined] trait GenericShowInstances {
+
+  implicit def equalShow[T, U <: T](implicit wu: Witness.Aux[U]): Show.Flat[T, Equal[U]] =
+    Show.instance(t => s"($t == ${wu.value})")
 }
 
 private[refined] trait GenericInferenceRules {

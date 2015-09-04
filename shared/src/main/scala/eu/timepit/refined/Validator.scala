@@ -37,19 +37,6 @@ object Validator {
 
   type Flat[T, P] = Validator[T, P, P]
 
-  def apply[T, P]: ValidatorAux[T, P] = new ValidatorAux
-
-  /**
-   * Helper class that allows the type `R` to be inferred from calls like
-   * `[[Validator]][T, P].get`.
-   *
-   * See [[http://tpolecat.github.io/2015/07/30/infer.html]] for a detailed
-   * explanation of this trick.
-   */
-  final class ValidatorAux[T, P] {
-    def get[R](implicit v: Validator[T, P, R]): Validator[T, P, R] = v
-  }
-
   /** Constructs a [[Validator]] from its parameters. */
   def instance[T, P, R](validateFun: T => Result[T, R], constant: Boolean = false): Validator[T, P, R] =
     new Validator[T, P, R] {

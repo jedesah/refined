@@ -34,10 +34,6 @@ object boolean extends BooleanValidators with BooleanShowInstances with BooleanI
 
   /** Exclusive disjunction of all predicates in `PS`. */
   case class OneOf[PS](ps: PS)
-
-  object Not {
-
-  }
 }
 
 private[refined] trait BooleanValidators {
@@ -167,8 +163,8 @@ private[refined] trait BooleanShowInstances {
 
       override def showResult(r: Res): String =
         r match {
-          case Passed(t, _) => s"Predicate ${showExpr(t)} did not fail."
-          case Failed(t, _) => s"Predicate ${showExpr(t)} did not pass."
+          case Passed(t, _) => s"Predicate ${showExpr(t)} did not pass."
+          case Failed(t, _) => s"Predicate ${showExpr(t)} did not fail."
         }
     }
 
@@ -232,13 +228,53 @@ private[refined] trait BooleanShowInstances {
       override def showResult(r: Res): String = {
         val expr = showExpr(r.value)
         (r.predicate.a, r.predicate.b) match {
-          case (Passed(_, _), Passed(_, _)) => s"Both predicates of $expr passed."
-          case (ar @ Failed(_, _), br @ Failed(_, _)) => ""
-          case (Passed(_, _), _) => ""
-          case (_, Passed(_, _)) => ""
+          case (Passed(_, _), Passed(_, _)) =>
+            s"Both predicates of $expr passed."
+
+          case (ar @ Failed(_, _), br @ Failed(_, _)) =>
+            s"Both predicates of $expr failed: Left: ${sa.showResult(ar)} Right: ${sb.showResult(br)}"
+
+          case (Passed(_, _), _) =>
+            s"Left predicate of $expr passed."
+
+          case (_, Passed(_, _)) =>
+            s"Right predicate of $expr passed."
         }
       }
     }
+
+  implicit def allOfHNilShow[T]: Show.Flat[T, AllOf[HNil]] =
+    Show.instance(t => "true")
+
+  implicit def allOfHConsShow[T, PH, PT <: HList, RH, RT <: HList](
+    implicit
+    sh: Show[T, PH, RH], st: Show[T, AllOf[PT], AllOf[RT]]
+  ): Show[T, AllOf[PH :: PT], AllOf[sh.Res :: RT]] =
+    new Show[T, AllOf[PH :: PT], AllOf[sh.Res :: RT]] {
+      override def showExpr(t: T): String = s"(${sh.showExpr(t)} && ${st.showExpr(t)})"
+
+      override def showResult(r: Res): String = super.showResult(r)
+    }
+
+  //Show.instance(t => s"(${sh.showExpr(t)} && ${st.showExpr(t)})")
+
+  /*  implicit def allOfHNilValidator[T]: Validator.Flat[T, AllOf[HNil]] =
+    Validator.constant(t => Passed(t, AllOf(HList())))
+
+  implicit def allOfHConsValidator[T, PH, PT <: HList, RH, RT <: HList](
+    implicit
+    vh: Validator[T, PH, RH], vt: Validator[T, AllOf[PT], AllOf[RT]]
+  ): Validator[T, AllOf[PH :: PT], AllOf[vh.Res :: RT]] =
+    new Validator[T, AllOf[PH :: PT], AllOf[vh.Res :: RT]] {
+      override def validate(t: T): Res =
+        (vh.validate(t), vt.validate(t)) match {
+          case (rh @ Passed(_, _), rt @ Passed(_, _)) => Passed(t, AllOf(rh :: rt.predicate.ps))
+          case (rh, rt) => Failed(t, AllOf(rh :: rt.predicate.ps))
+        }
+
+      override val isConstant: Boolean = vh.isConstant && vt.isConstant
+    }
+*/
 }
 
 private[refined] trait BooleanInferenceRules0 extends BooleanInferenceRules1 {

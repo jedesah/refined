@@ -44,4 +44,35 @@ class CollectionPredicateSpec extends Properties("CollectionPredicate") {
       Some("Predicate taking last(List(1, 2, 3)) = 3 failed: Predicate failed: (3 > 5).")
   }
   */
+
+  /*
+
+property("Empty.show") = secure {
+  Show[Empty, String].show("test") ?= "isEmpty(test)"
+}
+
+property("NonEmpty.show") = secure {
+  Show[NonEmpty, String].show("test") ?= "!isEmpty(test)"
+}
+
+property("Forall[LowerCase].show") = secure {
+  Show[Forall[LowerCase], String].show("abc") ?=
+    "(isLower('a') && isLower('b') && isLower('c'))"
+}
+
+property("Forall[UpperCase].show") = secure {
+  Show[Forall[UpperCase], String].show("abc") ?=
+    "(isUpper('a') && isUpper('b') && isUpper('c'))"
+}
+
+property("Last[Digit].show") = secure {
+  Show[Last[Digit], String].show("abc0") ?= "isDigit('0')"
+}
+
+property("Size.show") = secure {
+  type P = Size[Greater[_5] And LessEqual[_10]]
+  Show[P, String].show("test") ?= "((4 > 5) && !(4 > 10))"
+}
+
+*/
 }

@@ -10,7 +10,7 @@ object string extends StringValidators with StringShowInstances with StringInfer
   case class EndsWith[S](s: S)
 
   /** Predicate that checks if a `String` matches the regular expression `R`. */
-  case class MatchesRegex[R](r: R)
+  case class MatchesRegex[S](s: S)
 
   /** Predicate that checks if a `String` is a valid regular expression. */
   case class Regex()
@@ -39,7 +39,7 @@ private[refined] trait StringValidators {
   implicit def endsWithValidator[S <: String](implicit ws: Witness.Aux[S]): Validator.Flat[String, EndsWith[S]] =
     Validator.fromPredicate(_.endsWith(ws.value), EndsWith(ws.value))
 
-  implicit def matchesRegexValidator[R <: String](implicit wr: Witness.Aux[R]): Validator.Flat[String, MatchesRegex[R]] =
+  implicit def matchesRegexValidator[S <: String](implicit wr: Witness.Aux[S]): Validator.Flat[String, MatchesRegex[S]] =
     Validator.fromPredicate(_.matches(wr.value), MatchesRegex(wr.value))
 
   implicit def regexValidator: Validator.Flat[String, Regex] =
@@ -69,8 +69,29 @@ private[refined] trait StringShowInstances {
   implicit def endsWithShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, EndsWith[S]] =
     Show.instance(t => s""""$t".endsWith("${ws.value}")""")
 
+  implicit def matchesRegexShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, MatchesRegex[S]] =
+    Show.instance(t => s""""$t".matches("${ws.value}")""")
+
+  implicit def regexShow: Show.Flat[String, Regex] =
+    Show.fromPartial(new scala.util.matching.Regex(_), "Regex")
+
   implicit def startsWithShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, StartsWith[S]] =
     Show.instance(t => s""""$t".startsWith("${ws.value}")""")
+
+  implicit def uriShow: Show.Flat[String, Uri] =
+    Show.fromPartial(new java.net.URI(_), "Uri")
+
+  implicit def urlShow: Show.Flat[String, Url] =
+    Show.fromPartial(new java.net.URL(_), "Url")
+
+  implicit def uuidShow: Show.Flat[String, Uuid] =
+    Show.fromPartial(java.util.UUID.fromString, "Uuid")
+
+  implicit def xmlShow: Show.Flat[String, Xml] =
+    Show.fromPartial(scala.xml.XML.loadString, "Xml")
+
+  implicit def xpathShow: Show.Flat[String, XPath] =
+    Show.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, "XPath")
 }
 
 private[refined] trait StringInferenceRules {

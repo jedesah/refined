@@ -34,6 +34,10 @@ object boolean extends BooleanValidators with BooleanShowInstances with BooleanI
 
   /** Exclusive disjunction of all predicates in `PS`. */
   case class OneOf[PS](ps: PS)
+
+  object Not {
+
+  }
 }
 
 private[refined] trait BooleanValidators {
@@ -47,25 +51,20 @@ private[refined] trait BooleanValidators {
   implicit def notValidator[T, P, R](implicit v: Validator[T, P, R]): Validator[T, Not[P], Not[v.Res]] =
     Validator.instance(t => {
       val r = v.validate(t)
-      r match {
-        case Passed(_, _) => Failed(t, Not(r))
-        case Failed(_, _) => Passed(t, Not(r))
-      }
-    }, constant = v.isConstant)
+      r.invert.mapSnd(_ => Not(r))
+    }, v.isConstant)
 
   implicit def andValidator[T, A, B, RA, RB](
     implicit
     va: Validator[T, A, RA], vb: Validator[T, B, RB]
   ): Validator[T, A And B, va.Res And vb.Res] =
-    new Validator[T, A And B, va.Res And vb.Res] {
-      override def validate(t: T): Res =
-        (va.validate(t), vb.validate(t)) match {
-          case (ra @ Passed(_, _), rb @ Passed(_, _)) => Passed(t, And(ra, rb))
-          case (ra, rb) => Failed(t, And(ra, rb))
-        }
-
-      override val isConstant: Boolean = va.isConstant && vb.isConstant
-    }
+    Validator.instance(t => {
+      val p = And(va.validate(t), vb.validate(t))
+      (p.a, p.b) match {
+        case (Passed(_, _), Passed(_, _)) => Passed(t, p)
+        case _ => Failed(t, p)
+      }
+    }, va.isConstant && vb.isConstant)
 
   implicit def orValidator[T, A, B, RA, RB](
     implicit

@@ -77,6 +77,15 @@ object collection extends CollectionValidators with CollectionInferenceRules {
   /** Predicate that checks if a `TraversableOnce` is not empty. */
   type NonEmpty = Not[Empty]
 
+  object Empty {
+
+    implicit def emptyValidator[T](implicit ev: T => TraversableOnce[_]): Validator.Flat[T, Empty] =
+      Validator.fromPredicate(_.isEmpty, Empty())
+
+    implicit def emptyShow[T]: Show.Flat[T, Empty] =
+      Show.instance(t => s"isEmpty($t)")
+  }
+
   object Size {
 
   }
@@ -93,9 +102,6 @@ private[refined] trait CollectionValidators {
       val rc = vc.validate(ra.count(_.isPassed))
       rc.mapBoth(_ => t, _ => Count(ra, rc))
     })
-
-  implicit def emptyValidator[T](implicit ev: T => TraversableOnce[_]): Validator.Flat[T, Empty] =
-    Validator.fromPredicate(_.isEmpty, Empty())
 
   implicit def forallValidator[A, P, R, T[a] <: TraversableOnce[a]](
     implicit
@@ -177,10 +183,12 @@ private[refined] trait CollectionValidators {
 
       override def showResult(r: Res): String = {
         val size = r.value.size
-        r match {
-          case Passed(_, _) => s"Predicate taking size(${r.value}) = $size passed: ${s.showResult(r.predicate.p)}"
-          case Failed(_, _) => s"Predicate taking size(${r.value}) = $size failed: ${s.showResult(r.predicate.p)}"
-        }
+        val nested = s.showResult(r.predicate.p)
+
+        def msg(result: String) =
+          s"Predicate taking size(${r.value}) = $size $result: $nested"
+
+        r.fold((_, _) => msg("passed"), (_, _) => msg("failed"))
       }
     }
 }

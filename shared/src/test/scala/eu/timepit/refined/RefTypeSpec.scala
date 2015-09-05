@@ -34,9 +34,11 @@ abstract class RefTypeProperties[F[_, _]](name: String)(implicit rt: RefType[F])
     rt.refine[Interval[W.`-0.5`.T, W.`0.5`.T]](0.6).isLeft
   }
 
+  /*
   property("refine failure with Forall") = secure {
     rt.refine[Forall[LowerCase]]("Hallo").isLeft
   }
+  */
 
   property("refine success with MatchesRegex") = secure {
     type DigitsOnly = MatchesRegex[W.`"[0-9]+"`.T]

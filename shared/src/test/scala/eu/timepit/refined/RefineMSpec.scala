@@ -27,6 +27,7 @@ class RefineMSpec extends Properties("refineM") {
     illTyped("""refineMT[Forall[UpperCase]]("hello")""", "Predicate.*fail.*")
     true
   }
+  */
 
   property("refineM with Greater") = secure {
     def ignore1: Int Refined Greater[_10] = refineMV[Greater[_10]](15)
@@ -61,6 +62,7 @@ class RefineMSpec extends Properties("refineM") {
     true
   }
 
+  /*
   property("refineM with Contains") = secure {
     def ignore1: String Refined Contains[W.`'c'`.T] = refineMV("abcd")
     def ignore2: String @@ Contains[W.`'c'`.T] = refineMT("abcd")
@@ -68,6 +70,7 @@ class RefineMSpec extends Properties("refineM") {
     illTyped("""refineMT[Contains[W.`'c'`.T]]("abde")""", "Predicate.*fail.*")
     true
   }
+  */
 
   property("refineM with Double Witness") = secure {
     def ignore1: Double Refined Greater[W.`2.3`.T] = refineMV(2.4)
@@ -83,6 +86,7 @@ class RefineMSpec extends Properties("refineM") {
     true
   }
 
+  /*
   property("refineM failure with non-literals") = secure {
     illTyped("refineMV[NonEmpty](List(1, 2, 3))", "compile-time refinement.*")
     illTyped("refineMT[NonEmpty](List(1, 2, 3))", "compile-time refinement.*")

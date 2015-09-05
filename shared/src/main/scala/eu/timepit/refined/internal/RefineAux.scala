@@ -12,9 +12,9 @@ import eu.timepit.refined.Result.Passed
  */
 final class RefineAux[F[_, _], P](rt: RefType[F]) {
 
-  def apply[T, R](t: T)(implicit v: Validator[T, P, R]): Either[v.Res, F[T, P]] =
+  def apply[T, R](t: T)(implicit v: Validator[T, P, R], s: Show[T, P, R]): Either[String, F[T, P]] =
     v.validate(t) match {
       case Passed(_, _) => Right(rt.unsafeWrap(t))
-      case rv => Left(rv)
+      case rv => Left(s.showResult(rv))
     }
 }

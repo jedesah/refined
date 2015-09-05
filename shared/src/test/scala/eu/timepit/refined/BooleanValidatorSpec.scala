@@ -44,16 +44,16 @@ class BooleanValidatorSpec extends Properties("BooleanValidator") {
     !isValid[FF[Xor]](()) && isValid[FT[Xor]](()) && isValid[TF[Xor]](()) && !isValid[TT[Xor]](())
   }
 
-  property("AllOf[Greater[_0] :: Less[_10] :: HNil].isValid") = forAll { (i: Int) =>
+  property("AllOf.isValid") = forAll { (i: Int) =>
     isValid[AllOf[Greater[_0] :: Less[_10] :: HNil]](i) ?= (i > 0 && i < 10)
   }
 
-  property("AnyOf[Digit :: LowerCase :: Whitespace :: HNil].isValid") = forAll { (c: Char) =>
+  property("AnyOf.isValid") = forAll { (c: Char) =>
     isValid[AnyOf[Digit :: LowerCase :: Whitespace :: HNil]](c) ?=
       (c.isDigit || c.isLower || c.isWhitespace)
   }
 
-  property("OneOf[Digit :: LowerCase :: UpperCase :: HNil].isValid") = forAll { (c: Char) =>
+  property("OneOf.isValid") = forAll { (c: Char) =>
     isValid[OneOf[Digit :: LowerCase :: UpperCase :: HNil]](c) ?=
       (List(c.isDigit, c.isLower, c.isUpper).count(identity) == 1)
   }

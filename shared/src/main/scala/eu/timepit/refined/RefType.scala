@@ -37,7 +37,7 @@ trait RefType[F[_, _]] extends Serializable {
    *      | import eu.timepit.refined.numeric._
    *
    * scala> RefType[Refined].refine[Positive](10)
-   * res1: Either[Result[Int, Positive], Refined[Int, Positive]] = Right(Refined(10))
+   * res1: Either[String, Refined[Int, Positive]] = Right(Refined(10))
    * }}}
    *
    * Note: The return type is `[[internal.RefineAux]][F, P]`, which has
@@ -68,7 +68,7 @@ trait RefType[F[_, _]] extends Serializable {
   def refineM[P]: RefineMAux[F, P] =
     new RefineMAux
 
-  def mapRefine[T, P, U, R](tp: F[T, P])(f: T => U)(implicit v: Validator[U, P, R]): Either[v.Res, F[U, P]] =
+  def mapRefine[T, P, U, R](tp: F[T, P])(f: T => U)(implicit v: Validator[U, P, R], s: Show[U, P, R]): Either[String, F[U, P]] =
     refine(f(unwrap(tp)))
 }
 
@@ -110,7 +110,7 @@ object RefType {
     def unwrap: T =
       F.unwrap(tp)
 
-    def mapRefine[U, R](f: T => U)(implicit v: Validator[U, P, R]): Either[v.Res, F[U, P]] =
+    def mapRefine[U, R](f: T => U)(implicit v: Validator[U, P, R], s: Show[U, P, R]): Either[String, F[U, P]] =
       F.mapRefine(tp)(f)
   }
 

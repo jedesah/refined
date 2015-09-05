@@ -1,7 +1,7 @@
 package eu.timepit.refined
 
 import eu.timepit.refined.InferenceRule.==>
-import eu.timepit.refined.Result.Failed
+import eu.timepit.refined.Result.{Passed, Failed}
 import eu.timepit.refined.boolean.Not
 import eu.timepit.refined.collection._
 import eu.timepit.refined.generic.Equal
@@ -76,6 +76,10 @@ object collection extends CollectionValidators with CollectionInferenceRules {
 
   /** Predicate that checks if a `TraversableOnce` is not empty. */
   type NonEmpty = Not[Empty]
+
+  object Size {
+
+  }
 }
 
 private[refined] trait CollectionValidators {
@@ -163,6 +167,22 @@ private[refined] trait CollectionValidators {
       val rv = v.validate(t.size)
       rv.mapBoth(_ => t, _ => Size(rv))
     })
+
+  implicit def sizeShow[T, P, R](
+    implicit
+    s: Show[Int, P, R], ev: T => TraversableOnce[_]
+  ): Show[T, Size[P], Size[s.Res]] =
+    new Show[T, Size[P], Size[s.Res]] {
+      override def showExpr(t: T): String = s.showExpr(t.size)
+
+      override def showResult(r: Res): String = {
+        val size = r.value.size
+        r match {
+          case Passed(_, _) => s"Predicate taking size(${r.value}) = $size passed: ${s.showResult(r.predicate.p)}"
+          case Failed(_, _) => s"Predicate taking size(${r.value}) = $size failed: ${s.showResult(r.predicate.p)}"
+        }
+      }
+    }
 }
 
 private[refined] trait CollectionInferenceRules {

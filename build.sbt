@@ -211,6 +211,6 @@ addCommandAlias("validate", Seq(
   "refinedJVM/test",
   "scalastyle",
   "test:scalastyle",
-  "doc",
-  "docs/tut"
+  "doc"
+  //"docs/tut"
 ).mkString(";", ";", ""))

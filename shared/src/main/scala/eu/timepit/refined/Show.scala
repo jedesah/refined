@@ -11,10 +11,7 @@ trait Show[T, P, R] extends Serializable {
   def showExpr(t: T): String
 
   def showResult(r: Res): String =
-    r match {
-      case Passed(t, _) => s"Predicate passed: ${showExpr(t)}."
-      case Failed(t, _) => s"Predicate failed: ${showExpr(t)}."
-    }
+    s"${r.describe}: ${showExpr(r.value)}."
 
   def accumulateShowExpr(t: T): List[String] =
     List(showExpr(t))
@@ -31,12 +28,16 @@ object Show {
 
   def fromPartial[T, U, P](pf: T => U, name: String): Show.Flat[T, P] =
     new Show[T, P, P] {
-      override def showExpr(t: T): String = s"""isValid$name("$t")"""
+      override def showExpr(t: T): String =
+        s"""isValid$name("$t")"""
 
-      override def showResult(r: Res): String =
-        Try(pf(r.value)) match {
-          case Success(_) => s"$name predicate passed."
-          case Failure(e) => s"$name predicate failed: ${e.getMessage}"
+      override def showResult(r: Res): String = {
+        val prefix = s"$name predicate ${r.toVerb}"
+        val suffix = Try(pf(r.value)) match {
+          case Success(_) => "."
+          case Failure(e) => ": " + e.getMessage
         }
+        prefix + suffix
+      }
     }
 }

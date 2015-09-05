@@ -14,6 +14,9 @@ sealed abstract class Result[T, P] extends Product with Serializable {
       case Failed(t, p) => ifFailed(t, p)
     }
 
+  def replace[A](ifPassed: A, ifFailed: A): A =
+    fold((_, _) => ifPassed, (_, _) => ifFailed)
+
   def mapBoth[U, Q](f: T => U, g: P => Q): Result[U, Q] =
     fold((t, p) => Passed(f(t), g(p)), (t, p) => Failed(f(t), g(p)))
 
@@ -21,10 +24,19 @@ sealed abstract class Result[T, P] extends Product with Serializable {
     mapBoth(f, identity)
 
   def isPassed: Boolean =
-    fold((_, _) => true, (_, _) => false)
+    replace(true, false)
 
   def isFailed: Boolean =
-    fold((_, _) => false, (_, _) => true)
+    replace(false, true)
+
+  def toVerb: String =
+    replace("passed", "failed")
+
+  def describe: String =
+    s"Predicate $toVerb"
+
+  def describeWith(detail: String): String =
+    s"Predicate $detail $toVerb"
 }
 
 object Result {

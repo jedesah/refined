@@ -7,11 +7,11 @@ import org.scalacheck.Properties
 
 class StringShowSpec extends Properties("StringShow") {
 
-  property("EndsWith[S].showExpr") = secure {
+  property("EndsWith.showExpr") = secure {
     showExpr[EndsWith[W.`"cd"`.T]]("abcd") ?= """"abcd".endsWith("cd")"""
   }
 
-  property("MatchesRegex[R].showExpr") = secure {
+  property("MatchesRegex.showExpr") = secure {
     showExpr[MatchesRegex[W.`".{2,10}"`.T]]("Hello") ?= """"Hello".matches(".{2,10}")"""
   }
 
@@ -19,7 +19,7 @@ class StringShowSpec extends Properties("StringShow") {
     showExpr[Regex]("(a|b)") ?= """isValidRegex("(a|b)")"""
   }
 
-  property("StartsWith[S].showExpr") = secure {
+  property("StartsWith.showExpr") = secure {
     showExpr[StartsWith[W.`"ab"`.T]]("abcd") ?= """"abcd".startsWith("ab")"""
   }
 

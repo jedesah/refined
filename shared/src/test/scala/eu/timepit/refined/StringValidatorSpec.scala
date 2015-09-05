@@ -1,7 +1,6 @@
 package eu.timepit.refined
 
 import eu.timepit.refined.TestUtils._
-import eu.timepit.refined.boolean._
 import eu.timepit.refined.char._
 import eu.timepit.refined.collection._
 import eu.timepit.refined.numeric._
@@ -12,48 +11,16 @@ import shapeless.nat._
 
 class StringValidatorSpec extends Properties("StringValidator") {
 
-  property("Count[LowerCase, Greater[_2]].isValid") = forAll { (s: String) =>
-    isValid[Count[LowerCase, Greater[_2]]](s) ?= (s.count(_.isLower) > 2)
-  }
-
-  property("Empty.isValid") = forAll { (s: String) =>
-    isValid[Empty](s) ?= s.isEmpty
-  }
-
-  property("NonEmpty.isValid") = forAll { (s: String) =>
-    isValid[NonEmpty](s) ?= s.nonEmpty
-  }
-
-  property("Forall[LowerCase].isValid") = forAll { (s: String) =>
-    isValid[Forall[LowerCase]](s) ?= s.forall(_.isLower)
-  }
-
-  property("Head[Digit].isValid") = forAll { (s: String) =>
-    isValid[Head[Digit]](s) ?= s.headOption.fold(false)(_.isDigit)
-  }
-
-  property("Last[Letter].isValid") = forAll { (s: String) =>
-    isValid[Last[Letter]](s) ?= s.lastOption.fold(false)(_.isLetter)
-  }
-
-  property("Size.isValid") = forAll { (s: String) =>
-    isValid[Size[LessEqual[_10]]](s) ?= (s.length <= 10)
-  }
-
-  property("MinSize[_5].isValid") = forAll { (s: String) =>
-    isValid[MinSize[_5]](s) ?= (s.length >= 5)
-  }
-
-  property("MatchesRegex[R].isValid") = forAll { (s: String) =>
+  property("MatchesRegex.isValid") = forAll { (s: String) =>
     isValid[MatchesRegex[W.`".{2,10}"`.T]](s) ?= s.matches(".{2,10}")
   }
 
-  property("EndsWith[S].isValid") = secure {
+  property("EndsWith.isValid") = secure {
     val s = "abcd"
     isValid[EndsWith[W.`"cd"`.T]](s) ?= s.endsWith("cd")
   }
 
-  property("StartsWith[S].isValid") = secure {
+  property("StartsWith.isValid") = secure {
     val s = "abcd"
     isValid[StartsWith[W.`"ab"`.T]](s) ?= s.startsWith("ab")
   }
@@ -80,5 +47,43 @@ class StringValidatorSpec extends Properties("StringValidator") {
 
   property("Uuid.notValid") = secure {
     !isValid[Uuid]("whops")
+  }
+
+  // collection predicates applied to String
+
+  property("Count.isValid") = forAll { (s: String) =>
+    isValid[Count[LowerCase, Greater[_2]]](s) ?= (s.count(_.isLower) > 2)
+  }
+
+  property("Empty.isValid") = forAll { (s: String) =>
+    isValid[Empty](s) ?= s.isEmpty
+  }
+
+  property("NonEmpty.isValid") = forAll { (s: String) =>
+    isValid[NonEmpty](s) ?= s.nonEmpty
+  }
+
+  property("Forall.isValid") = forAll { (s: String) =>
+    isValid[Forall[LowerCase]](s) ?= s.forall(_.isLower)
+  }
+
+  property("Head.isValid") = forAll { (s: String) =>
+    isValid[Head[Digit]](s) ?= s.headOption.fold(false)(_.isDigit)
+  }
+
+  property("Index.isValid") = forAll { (s: String) =>
+    isValid[Index[_1, Whitespace]](s) ?= s.lift(1).fold(false)(_.isWhitespace)
+  }
+
+  property("Last.isValid") = forAll { (s: String) =>
+    isValid[Last[Letter]](s) ?= s.lastOption.fold(false)(_.isLetter)
+  }
+
+  property("Size.isValid") = forAll { (s: String) =>
+    isValid[Size[LessEqual[_10]]](s) ?= (s.length <= 10)
+  }
+
+  property("MinSize.isValid") = forAll { (s: String) =>
+    isValid[MinSize[_5]](s) ?= (s.length >= 5)
   }
 }

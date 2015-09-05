@@ -77,6 +77,33 @@ object collection extends CollectionValidators with CollectionInferenceRules {
   /** Predicate that checks if a `TraversableOnce` is not empty. */
   type NonEmpty = Not[Empty]
 
+  object Count {
+
+    implicit def countValidator[A, PA, RA, PC, RC, T](
+      implicit
+      va: Validator[A, PA, RA], vc: Validator[Int, PC, RC], ev: T => TraversableOnce[A]
+    ): Validator[T, Count[PA, PC], Count[List[va.Res], vc.Res]] =
+      Validator.instance(t => {
+        val ra = t.toList.map(va.validate)
+        val rc = vc.validate(ra.count(_.isPassed))
+        rc.mapBoth(_ => t, _ => Count(ra, rc))
+      })
+
+    implicit def countShow[A, PA, RA, PC, RC, T](
+      implicit
+      sa: Show[A, PA, RA], sc: Show[Int, PC, RC], ev: T => TraversableOnce[A]
+    ): Show[T, Count[PA, PC], Count[List[sa.Res], sc.Res]] =
+      new Show[T, Count[PA, PC], Count[List[sa.Res], sc.Res]] {
+        override def showExpr(t: T): String =
+          t.toList.map(sa.showExpr).mkString("count(", ", ", ")")
+
+        override def showResult(r: Res): String = {
+          val count = r.predicate.pa.count(_.isPassed)
+          s"${showExpr(r.value)} = $count: ${sc.showResult(r.predicate.pc)}"
+        }
+      }
+  }
+
   object Empty {
 
     implicit def emptyValidator[T](implicit ev: T => TraversableOnce[_]): Validator.Flat[T, Empty] =
@@ -92,16 +119,6 @@ object collection extends CollectionValidators with CollectionInferenceRules {
 }
 
 private[refined] trait CollectionValidators {
-
-  implicit def countValidator[A, PA, RA, PC, RC, T](
-    implicit
-    va: Validator[A, PA, RA], vc: Validator[Int, PC, RC], ev: T => TraversableOnce[A]
-  ): Validator[T, Count[PA, PC], Count[List[va.Res], vc.Res]] =
-    Validator.instance(t => {
-      val ra = t.toList.map(va.validate)
-      val rc = vc.validate(ra.count(_.isPassed))
-      rc.mapBoth(_ => t, _ => Count(ra, rc))
-    })
 
   implicit def forallValidator[A, P, R, T[a] <: TraversableOnce[a]](
     implicit

@@ -31,12 +31,9 @@ object Show {
       override def showExpr(t: T): String = s"""isValid$name("$t")"""
 
       override def showResult(r: Res): String =
-        r match {
-          case Passed(_, _) => s"$name predicate passed."
-          case Failed(t, _) => Try(pf(t)) match {
-            case Success(_) => s"$name predicate failed."
-            case Failure(e) => s"$name predicate failed: ${e.getMessage}"
-          }
+        Try(pf(r.value)) match {
+          case Success(_) => s"$name predicate passed."
+          case Failure(e) => s"$name predicate failed: ${e.getMessage}"
         }
     }
 }

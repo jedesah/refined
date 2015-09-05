@@ -22,7 +22,7 @@ class BooleanShowSpec extends Properties("BooleanShow") {
   }
 
   property("Not.showResult") = secure {
-    showResult[Not[True]](()) ?= "Predicate !true did not fail."
+    showResult[Not[True]](()) ?= "Predicate true did not fail."
   }
 
   property("And.showExpr") = secure {

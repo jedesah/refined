@@ -12,13 +12,14 @@ import shapeless.tag.@@
 import shapeless.test.illTyped
 
 class RefineMSpec extends Properties("refineM") {
-  /*
+
   property("RefineMAux instance") = secure {
     val rv = refineMV[Digit]
     val rt = refineMT[Digit]
     rv('0') == Refined('0') && rt('0') == '0'
   }
 
+  /*
   property("refineM with Forall") = secure {
     def ignore1: String Refined Forall[LowerCase] = refineMV[Forall[LowerCase]]("hello")
     def ignore2: String @@ Forall[LowerCase] = refineMT[Forall[LowerCase]]("hello")

@@ -15,6 +15,9 @@ trait Show[T, P, R] extends Serializable {
       case Passed(t, _) => s"Predicate passed: ${showExpr(t)}."
       case Failed(t, _) => s"Predicate failed: ${showExpr(t)}."
     }
+
+  def accumulateShowExpr(t: T): List[String] =
+    List(showExpr(t))
 }
 
 object Show {

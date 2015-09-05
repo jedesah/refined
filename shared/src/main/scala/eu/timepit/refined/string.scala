@@ -1,10 +1,9 @@
 package eu.timepit.refined
 
 import eu.timepit.refined.InferenceRule.==>
-import eu.timepit.refined.string._
 import shapeless.Witness
 
-object string extends StringValidators with StringShowInstances with StringInferenceRules {
+object string {
 
   /** Predicate that checks if a `String` ends with the suffix `S`. */
   case class EndsWith[S](s: S)
@@ -32,73 +31,97 @@ object string extends StringValidators with StringShowInstances with StringInfer
 
   /** Predicate that checks if a `String` is a valid XPath expression. */
   case class XPath()
-}
 
-private[refined] trait StringValidators {
+  object EndsWith {
 
-  implicit def endsWithValidator[S <: String](implicit ws: Witness.Aux[S]): Validator.Flat[String, EndsWith[S]] =
-    Validator.fromPredicate(_.endsWith(ws.value), EndsWith(ws.value))
+    implicit def endsWithValidator[S <: String](implicit ws: Witness.Aux[S]): Validator.Flat[String, EndsWith[S]] =
+      Validator.fromPredicate(_.endsWith(ws.value), EndsWith(ws.value))
 
-  implicit def matchesRegexValidator[S <: String](implicit wr: Witness.Aux[S]): Validator.Flat[String, MatchesRegex[S]] =
-    Validator.fromPredicate(_.matches(wr.value), MatchesRegex(wr.value))
+    implicit def endsWithShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, EndsWith[S]] =
+      Show.instance(t => s""""$t".endsWith("${ws.value}")""")
 
-  implicit def regexValidator: Validator.Flat[String, Regex] =
-    Validator.fromPartial(new scala.util.matching.Regex(_), Regex())
+    implicit def endsWithInference[A <: String, B <: String](
+      implicit
+      wa: Witness.Aux[A], wb: Witness.Aux[B]
+    ): EndsWith[A] ==> EndsWith[B] =
+      InferenceRule(wa.value.endsWith(wb.value), s"endsWithInference(${wa.value}, ${wb.value})")
+  }
 
-  implicit def startsWithValidator[S <: String](implicit ws: Witness.Aux[S]): Validator.Flat[String, StartsWith[S]] =
-    Validator.fromPredicate(_.startsWith(ws.value), StartsWith(ws.value))
+  object MatchesRegex {
 
-  implicit def uriValidator: Validator.Flat[String, Uri] =
-    Validator.fromPartial(new java.net.URI(_), Uri())
+    implicit def matchesRegexValidator[S <: String](implicit wr: Witness.Aux[S]): Validator.Flat[String, MatchesRegex[S]] =
+      Validator.fromPredicate(_.matches(wr.value), MatchesRegex(wr.value))
 
-  implicit def urlValidator: Validator.Flat[String, Url] =
-    Validator.fromPartial(new java.net.URL(_), Url())
+    implicit def matchesRegexShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, MatchesRegex[S]] =
+      Show.instance(t => s""""$t".matches("${ws.value}")""")
+  }
 
-  implicit def uuidValidator: Validator.Flat[String, Uuid] =
-    Validator.fromPartial(java.util.UUID.fromString, Uuid())
+  object Regex {
 
-  implicit def xmlValidator: Validator.Flat[String, Xml] =
-    Validator.fromPartial(scala.xml.XML.loadString, Xml())
+    implicit def regexValidator: Validator.Flat[String, Regex] =
+      Validator.fromPartial(new scala.util.matching.Regex(_), Regex())
 
-  implicit def xpathValidator: Validator.Flat[String, XPath] =
-    Validator.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, XPath())
-}
+    implicit def regexShow: Show.Flat[String, Regex] =
+      Show.fromPartial(new scala.util.matching.Regex(_), "Regex")
+  }
 
-private[refined] trait StringShowInstances {
+  object StartsWith {
 
-  implicit def endsWithShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, EndsWith[S]] =
-    Show.instance(t => s""""$t".endsWith("${ws.value}")""")
+    implicit def startsWithValidator[S <: String](implicit ws: Witness.Aux[S]): Validator.Flat[String, StartsWith[S]] =
+      Validator.fromPredicate(_.startsWith(ws.value), StartsWith(ws.value))
 
-  implicit def matchesRegexShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, MatchesRegex[S]] =
-    Show.instance(t => s""""$t".matches("${ws.value}")""")
+    implicit def startsWithShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, StartsWith[S]] =
+      Show.instance(t => s""""$t".startsWith("${ws.value}")""")
 
-  implicit def regexShow: Show.Flat[String, Regex] =
-    Show.fromPartial(new scala.util.matching.Regex(_), "Regex")
+    implicit def startsWithInference[A <: String, B <: String](
+      implicit
+      wa: Witness.Aux[A], wb: Witness.Aux[B]
+    ): StartsWith[A] ==> StartsWith[B] =
+      InferenceRule(wa.value.startsWith(wb.value), s"startsWithInference(${wa.value}, ${wb.value})")
+  }
 
-  implicit def startsWithShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, StartsWith[S]] =
-    Show.instance(t => s""""$t".startsWith("${ws.value}")""")
+  object Uri {
 
-  implicit def uriShow: Show.Flat[String, Uri] =
-    Show.fromPartial(new java.net.URI(_), "Uri")
+    implicit def uriValidator: Validator.Flat[String, Uri] =
+      Validator.fromPartial(new java.net.URI(_), Uri())
 
-  implicit def urlShow: Show.Flat[String, Url] =
-    Show.fromPartial(new java.net.URL(_), "Url")
+    implicit def uriShow: Show.Flat[String, Uri] =
+      Show.fromPartial(new java.net.URI(_), "Uri")
+  }
 
-  implicit def uuidShow: Show.Flat[String, Uuid] =
-    Show.fromPartial(java.util.UUID.fromString, "Uuid")
+  object Url {
 
-  implicit def xmlShow: Show.Flat[String, Xml] =
-    Show.fromPartial(scala.xml.XML.loadString, "Xml")
+    implicit def urlValidator: Validator.Flat[String, Url] =
+      Validator.fromPartial(new java.net.URL(_), Url())
 
-  implicit def xpathShow: Show.Flat[String, XPath] =
-    Show.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, "XPath")
-}
+    implicit def urlShow: Show.Flat[String, Url] =
+      Show.fromPartial(new java.net.URL(_), "Url")
+  }
 
-private[refined] trait StringInferenceRules {
+  object Uuid {
 
-  implicit def endsWithInference[A <: String, B <: String](implicit wa: Witness.Aux[A], wb: Witness.Aux[B]): EndsWith[A] ==> EndsWith[B] =
-    InferenceRule(wa.value.endsWith(wb.value), s"endsWithInference(${wa.value}, ${wb.value})")
+    implicit def uuidValidator: Validator.Flat[String, Uuid] =
+      Validator.fromPartial(java.util.UUID.fromString, Uuid())
 
-  implicit def startsWithInference[A <: String, B <: String](implicit wa: Witness.Aux[A], wb: Witness.Aux[B]): StartsWith[A] ==> StartsWith[B] =
-    InferenceRule(wa.value.startsWith(wb.value), s"startsWithInference(${wa.value}, ${wb.value})")
+    implicit def uuidShow: Show.Flat[String, Uuid] =
+      Show.fromPartial(java.util.UUID.fromString, "Uuid")
+  }
+
+  object Xml {
+
+    implicit def xmlValidator: Validator.Flat[String, Xml] =
+      Validator.fromPartial(scala.xml.XML.loadString, Xml())
+
+    implicit def xmlShow: Show.Flat[String, Xml] =
+      Show.fromPartial(scala.xml.XML.loadString, "Xml")
+  }
+
+  object XPath {
+
+    implicit def xpathValidator: Validator.Flat[String, XPath] =
+      Validator.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, XPath())
+
+    implicit def xpathShow: Show.Flat[String, XPath] =
+      Show.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, "XPath")
+  }
 }

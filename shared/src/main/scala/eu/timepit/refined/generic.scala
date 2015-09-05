@@ -5,8 +5,9 @@ import eu.timepit.refined.Result.Passed
 import eu.timepit.refined.generic._
 import shapeless.ops.coproduct.ToHList
 import shapeless.ops.hlist.ToList
+import shapeless.ops.nat.ToInt
 import shapeless.ops.record.Keys
-import shapeless.{Coproduct, HList, LabelledGeneric, Witness}
+import shapeless._
 
 object generic extends GenericValidators with GenericShowInstances with GenericInferenceRules {
 
@@ -30,6 +31,12 @@ private[refined] trait GenericValidators {
 
   implicit def equalValidator[T, U <: T](implicit wu: Witness.Aux[U]): Validator.Flat[T, Equal[U]] =
     Validator.fromPredicate(_ == wu.value, Equal(wu.value))
+
+  implicit def equalValidatorNat[N <: Nat, T](
+    implicit
+    tn: ToInt[N], wn: Witness.Aux[N], nt: Numeric[T]
+  ): Validator.Flat[T, Equal[N]] =
+    Validator.fromPredicate(t => nt.toDouble(t) == tn(), Equal(wn.value))
 
   implicit def ctorNamesValidator[T, P, R, R0 <: Coproduct, R1 <: HList, K <: HList](
     implicit
@@ -77,10 +84,19 @@ private[refined] trait GenericShowInstances {
 
   implicit def equalShow[T, U <: T](implicit wu: Witness.Aux[U]): Show.Flat[T, Equal[U]] =
     Show.instance(t => s"($t == ${wu.value})")
+
+  implicit def equalShowNat[T, N <: Nat](implicit tn: ToInt[N]): Show.Flat[T, Equal[N]] =
+    Show.instance(t => s"($t == ${tn()})")
 }
 
 private[refined] trait GenericInferenceRules {
 
   implicit def equalValidatorInference[T, U <: T, P, R](implicit v: Validator[T, P, R], wu: Witness.Aux[U]): Equal[U] ==> P =
     InferenceRule(v.isValid(wu.value), s"equalValidatorInference(${wu.value})")
+
+  implicit def equalValidatorInferenceNat[T, P, R, N <: Nat](
+    implicit
+    v: Validator[T, P, R], nt: Numeric[T], tn: ToInt[N]
+  ): Equal[N] ==> P =
+    InferenceRule(v.isValid(nt.fromInt(tn())), s"equalValidatorInferenceNat(${nt.fromInt(tn())})")
 }

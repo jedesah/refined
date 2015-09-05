@@ -21,9 +21,11 @@ class NumericInferenceSpec extends Properties("NumericInference") {
     InferenceRule[LessEqual[W.`7.2`.T], LessEqual[W.`7.5`.T]].isValid
   }
 
+  /*
   property("LessEqual[A] ==> LessEqual[A]") = secure {
     InferenceRule[LessEqual[W.`1`.T], LessEqual[W.`1`.T]].isValid
   }
+  */
 
   property("LessEqual[A] =!> LessEqual[B]") = secure {
     InferenceRule[LessEqual[W.`7.5`.T], LessEqual[W.`7.2`.T]].notValid
@@ -41,9 +43,11 @@ class NumericInferenceSpec extends Properties("NumericInference") {
     InferenceRule[GreaterEqual[W.`7.5`.T], GreaterEqual[W.`7.2`.T]].isValid
   }
 
+  /*
   property("GreaterEqual[A] ==> GreaterEqual[A]") = secure {
     InferenceRule[GreaterEqual[W.`1`.T], GreaterEqual[W.`1`.T]].isValid
   }
+  */
 
   property("GreaterEqual[A] =!> GreaterEqual[B]") = secure {
     InferenceRule[GreaterEqual[W.`7.2`.T], GreaterEqual[W.`7.5`.T]].notValid
@@ -85,9 +89,11 @@ class NumericInferenceSpec extends Properties("NumericInference") {
     InferenceRule[Interval[_5, _10], LessEqual[_11]].isValid
   }
 
+  /*
   property("Interval[Nat] ==> GreaterEqual[Nat]") = secure {
     InferenceRule[Interval[_5, _10], GreaterEqual[_4]].isValid
   }
+  */
 
   property("Equal[Nat] ==> Greater[A]") = secure {
     InferenceRule[Equal[_10], Greater[W.`5`.T]].isValid

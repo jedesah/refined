@@ -1,5 +1,6 @@
 package eu.timepit.refined
 
+import eu.timepit.refined.Result.Passed
 import eu.timepit.refined.TestUtils._
 import eu.timepit.refined.char._
 import org.scalacheck.Prop._
@@ -9,6 +10,10 @@ class CharValidatorSpec extends Properties("CharValidator") {
 
   property("Digit.isValid") = forAll { (c: Char) =>
     isValid[Digit](c) ?= c.isDigit
+  }
+
+  property("Digit.validate") = secure {
+    validate[Digit]('0') ?= Passed('0', Digit())
   }
 
   property("Letter.isValid") = forAll { (c: Char) =>

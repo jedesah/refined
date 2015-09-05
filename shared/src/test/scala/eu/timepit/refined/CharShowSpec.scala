@@ -11,8 +11,16 @@ class CharShowSpec extends Properties("CharShow") {
     showExpr[Digit]('c') ?= "isDigit('c')"
   }
 
+  property("Digit.showResult.Failed") = secure {
+    showResult[Digit]('c') ?= "Predicate failed: isDigit('c')."
+  }
+
   property("Letter.showExpr") = secure {
     showExpr[Letter]('c') ?= "isLetter('c')"
+  }
+
+  property("Letter.showResult.Passed") = secure {
+    showResult[Letter]('c') ?= "Predicate passed: isLetter('c')."
   }
 
   property("LowerCase.showExpr") = secure {

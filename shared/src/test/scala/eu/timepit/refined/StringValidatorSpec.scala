@@ -12,6 +12,10 @@ import shapeless.nat._
 
 class StringValidatorSpec extends Properties("StringValidator") {
 
+  property("Count[LowerCase, Greater[_2]].isValid") = forAll { (s: String) =>
+    isValid[Count[LowerCase, Greater[_2]]](s) ?= (s.count(_.isLower) > 2)
+  }
+
   property("Empty.isValid") = forAll { (s: String) =>
     isValid[Empty](s) ?= s.isEmpty
   }
@@ -28,12 +32,12 @@ class StringValidatorSpec extends Properties("StringValidator") {
     isValid[Head[Digit]](s) ?= s.headOption.fold(false)(_.isDigit)
   }
 
-  property("Size.isValid") = forAll { (s: String) =>
-    isValid[Size[LessEqual[_10]]](s) ?= (s.length <= 10)
+  property("Last[Letter].isValid") = forAll { (s: String) =>
+    isValid[Last[Letter]](s) ?= s.lastOption.fold(false)(_.isLetter)
   }
 
-  property("Count[LowerCase, Greater[_2]].isValid") = forAll { (s: String) =>
-    isValid[Count[LowerCase, Greater[_2]]](s) ?= (s.count(_.isLower) > 2)
+  property("Size.isValid") = forAll { (s: String) =>
+    isValid[Size[LessEqual[_10]]](s) ?= (s.length <= 10)
   }
 
   property("MinSize[_5].isValid") = forAll { (s: String) =>

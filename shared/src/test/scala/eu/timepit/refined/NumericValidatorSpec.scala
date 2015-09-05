@@ -56,4 +56,8 @@ class NumericValidatorSpec extends Properties("NumericValidator") {
   property("Equal.Nat ~= Equal") = forAll { (i: Int) =>
     isValid[Equal[_1]](i) ?= isValid[Equal[W.`1`.T]](i)
   }
+
+  property("Positive != NonPositive") = forAll { (i: Int) =>
+    validate[Positive](i).isPassed == validate[NonPositive](i).isFailed
+  }
 }

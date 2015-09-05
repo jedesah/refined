@@ -9,6 +9,13 @@ object TestUtils {
       v.isValid(t)
   }
 
+  def validate[P]: ValidateAux[P] = new ValidateAux
+
+  class ValidateAux[P] {
+    def apply[T, R](t: T)(implicit v: Validator[T, P, R]): v.Res =
+      v.validate(t)
+  }
+
   def showExpr[P]: ShowExprAux[P] = new ShowExprAux
 
   class ShowExprAux[P] {

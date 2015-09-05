@@ -1,15 +1,11 @@
 package eu.timepit.refined
 
+import eu.timepit.refined.TestUtils._
 import eu.timepit.refined.boolean._
-import eu.timepit.refined.char._
-import eu.timepit.refined.numeric.{Greater, Less}
 import org.scalacheck.Prop._
 import org.scalacheck.Properties
-import shapeless.nat._
-import shapeless.{::, HNil}
 
-/*
-class BooleanPredicateSpec extends Properties("BooleanPredicate") {
+class BooleanValidatorSpec extends Properties("BooleanValidator") {
 
   type FF[Op[_, _]] = False Op False
   type FT[Op[_, _]] = False Op True
@@ -17,46 +13,34 @@ class BooleanPredicateSpec extends Properties("BooleanPredicate") {
   type TT[Op[_, _]] = True Op True
 
   property("True.isValid") = secure {
-    Predicate[True, Unit].isValid(())
+    isValid[True](())
   }
 
   property("Not[True].isValid") = secure {
-    Predicate[Not[True], Unit].notValid(())
+    !isValid[Not[True]](())
   }
 
   property("False.isValid") = secure {
-    Predicate[False, Unit].notValid(())
+    !isValid[False](())
   }
 
   property("Not[False].isValid") = secure {
-    Predicate[Not[False], Unit].isValid(())
+    isValid[Not[False]](())
   }
 
   property("And.isValid") = secure {
-    Predicate[FF[And], Unit].notValid(()) &&
-      Predicate[FT[And], Unit].notValid(()) &&
-      Predicate[TF[And], Unit].notValid(()) &&
-      Predicate[TT[And], Unit].isValid(())
+    !isValid[FF[And]](()) && !isValid[FT[And]](()) && !isValid[TF[And]](()) && isValid[TT[And]](())
   }
 
   property("Or.isValid") = secure {
-    Predicate[FF[Or], Unit].notValid(()) &&
-      Predicate[FT[Or], Unit].isValid(()) &&
-      Predicate[TF[Or], Unit].isValid(()) &&
-      Predicate[TT[Or], Unit].isValid(())
+    !isValid[FF[Or]](()) && isValid[FT[Or]](()) && isValid[TF[Or]](()) && isValid[TT[Or]](())
   }
 
   property("Xor.isValid") = secure {
-    Predicate[FF[Xor], Unit].notValid(()) &&
-      Predicate[FT[Xor], Unit].isValid(()) &&
-      Predicate[TF[Xor], Unit].isValid(()) &&
-      Predicate[TT[Xor], Unit].notValid(())
+    !isValid[FF[Xor]](()) && isValid[FT[Xor]](()) && isValid[TF[Xor]](()) && !isValid[TT[Xor]](())
   }
 
-  property("Xor.show") = secure {
-    Predicate[TF[Xor], Unit].show(()) ?= "(true ^ false)"
-  }
-
+  /*
   property("AllOf[Greater[_0] :: Less[_10] :: HNil].isValid") = forAll { (i: Int) =>
     Predicate[AllOf[Greater[_0] :: Less[_10] :: HNil], Int].isValid(i) ?=
       (i > 0 && i < 10)
@@ -96,5 +80,5 @@ class BooleanPredicateSpec extends Properties("BooleanPredicate") {
     val p = Predicate[OneOf[Digit :: LowerCase :: UpperCase :: HNil], Char]
     p.contramap(identity[Char]).accumulateShow('c') ?= p.accumulateShow('c')
   }
+*/
 }
-*/ 

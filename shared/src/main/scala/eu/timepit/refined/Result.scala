@@ -20,12 +20,6 @@ sealed abstract class Result[T, P] extends Product with Serializable {
   def mapFst[U](f: T => U): Result[U, P] =
     mapBoth(f, identity)
 
-  def mapSnd[Q](g: P => Q): Result[T, Q] =
-    mapBoth(identity, g)
-
-  def invert: Result[T, P] =
-    fold(Failed.apply, Passed.apply)
-
   def isPassed: Boolean =
     fold((_, _) => true, (_, _) => false)
 

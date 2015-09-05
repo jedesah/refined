@@ -34,21 +34,60 @@ object boolean extends BooleanValidators with BooleanShowInstances with BooleanI
 
   /** Exclusive disjunction of all predicates in `PS`. */
   case class OneOf[PS](ps: PS)
+
+  object True {
+
+    implicit def trueValidator[T]: Validator.Flat[T, True] =
+      Validator.constant(t => Passed(t, True()))
+
+    implicit def trueShow[T]: Show.Flat[T, True] =
+      Show.instance(_ => "true")
+  }
+
+  object False {
+
+    implicit def falseValidator[T]: Validator.Flat[T, False] =
+      Validator.constant(t => Failed(t, False()))
+
+    implicit def falseShow[T]: Show.Flat[T, False] =
+      Show.instance(_ => "false")
+  }
+
+  object Not {
+
+    implicit def notValidator[T, P, R](implicit v: Validator[T, P, R]): Validator[T, Not[P], Not[v.Res]] =
+      new Validator[T, Not[P], Not[v.Res]] {
+        override def validate(t: T): Res = {
+          val r = v.validate(t)
+          r match {
+            case Passed(_, _) => Failed(t, Not(r))
+            case Failed(_, _) => Passed(t, Not(r))
+          }
+        }
+
+        override def isConstant: Boolean = v.isConstant
+      }
+
+    implicit def notShow[T, P, R](implicit s: Show[T, P, R]): Show[T, Not[P], Not[s.Res]] =
+      new Show[T, Not[P], Not[s.Res]] {
+        override def showExpr(t: T): String = s"!${s.showExpr(t)}"
+
+        override def showResult(r: Res): String =
+          r match {
+            case Passed(t, _) => s"Predicate ${s.showExpr(t)} did not pass."
+            case Failed(t, _) => s"Predicate ${s.showExpr(t)} did not fail."
+          }
+      }
+
+    implicit def doubleNegationElimination[A, B](implicit p1: A ==> B): Not[Not[A]] ==> B =
+      p1.adapt("doubleNegationElimination(%s)")
+
+    implicit def doubleNegationIntroduction[A, B](implicit p1: A ==> B): A ==> Not[Not[B]] =
+      p1.adapt("doubleNegationIntroduction(%s)")
+  }
 }
 
 private[refined] trait BooleanValidators {
-
-  implicit def trueValidator[T]: Validator.Flat[T, True] =
-    Validator.constant(t => Passed(t, True()))
-
-  implicit def falseValidator[T]: Validator.Flat[T, False] =
-    Validator.constant(t => Failed(t, False()))
-
-  implicit def notValidator[T, P, R](implicit v: Validator[T, P, R]): Validator[T, Not[P], Not[v.Res]] =
-    Validator.instance(t => {
-      val r = v.validate(t)
-      r.invert.mapSnd(_ => Not(r))
-    }, v.isConstant)
 
   implicit def andValidator[T, A, B, RA, RB](
     implicit
@@ -150,23 +189,6 @@ private[refined] trait BooleanValidators {
 }
 
 private[refined] trait BooleanShowInstances {
-
-  implicit def trueShow[T]: Show.Flat[T, True] =
-    Show.instance(_ => "true")
-
-  implicit def falseShow[T]: Show.Flat[T, False] =
-    Show.instance(_ => "false")
-
-  implicit def notShow[T, P, R](implicit s: Show[T, P, R]): Show[T, Not[P], Not[s.Res]] =
-    new Show[T, Not[P], Not[s.Res]] {
-      override def showExpr(t: T): String = s"!${s.showExpr(t)}"
-
-      override def showResult(r: Res): String =
-        r match {
-          case Passed(t, _) => s"Predicate ${s.showExpr(t)} did not pass."
-          case Failed(t, _) => s"Predicate ${s.showExpr(t)} did not fail."
-        }
-    }
 
   implicit def andShow[T, A, B, RA, RB](
     implicit
@@ -281,12 +303,6 @@ private[refined] trait BooleanInferenceRules0 extends BooleanInferenceRules1 {
 
   implicit def minimalTautology[A]: A ==> A =
     InferenceRule.alwaysValid("minimalTautology")
-
-  implicit def doubleNegationElimination[A, B](implicit p1: A ==> B): Not[Not[A]] ==> B =
-    p1.adapt("doubleNegationElimination(%s)")
-
-  implicit def doubleNegationIntroduction[A, B](implicit p1: A ==> B): A ==> Not[Not[B]] =
-    p1.adapt("doubleNegationIntroduction(%s)")
 
   implicit def conjunctionAssociativity[A, B, C]: ((A And B) And C) ==> (A And (B And C)) =
     InferenceRule.alwaysValid("conjunctionAssociativity")

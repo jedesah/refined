@@ -109,19 +109,25 @@ object string {
 
   object Xml {
 
+    private def pf(s: String) =
+      scala.xml.XML.loadString(s)
+
     implicit def xmlValidator: Validator.Flat[String, Xml] =
-      Validator.fromPartial(scala.xml.XML.loadString, Xml())
+      Validator.fromPartial(pf, Xml())
 
     implicit def xmlShow: Show.Flat[String, Xml] =
-      Show.fromPartial(scala.xml.XML.loadString, "Xml")
+      Show.fromPartial(pf, "Xml")
   }
 
   object XPath {
 
+    private def pf(s: String) =
+      javax.xml.xpath.XPathFactory.newInstance().newXPath().compile(s)
+
     implicit def xpathValidator: Validator.Flat[String, XPath] =
-      Validator.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, XPath())
+      Validator.fromPartial(pf, XPath())
 
     implicit def xpathShow: Show.Flat[String, XPath] =
-      Show.fromPartial(javax.xml.xpath.XPathFactory.newInstance().newXPath().compile, "XPath")
+      Show.fromPartial(pf, "XPath")
   }
 }

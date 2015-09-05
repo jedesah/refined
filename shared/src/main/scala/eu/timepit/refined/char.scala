@@ -1,9 +1,8 @@
 package eu.timepit.refined
 
 import eu.timepit.refined.boolean.Or
-import eu.timepit.refined.char._
 
-object char extends CharValidators with CharShowInstances {
+object char {
 
   /** Predicate that checks if a `Char` is a digit. */
   case class Digit()
@@ -22,40 +21,49 @@ object char extends CharValidators with CharShowInstances {
 
   /** Predicate that checks if a `Char` is a letter or digit. */
   type LetterOrDigit = Letter Or Digit
-}
 
-private[refined] trait CharValidators {
+  object Digit {
 
-  implicit def digitValidator: Validator.Flat[Char, Digit] =
-    Validator.fromPredicate(_.isDigit, Digit())
+    implicit def digitValidator: Validator.Flat[Char, Digit] =
+      Validator.fromPredicate(_.isDigit, Digit())
 
-  implicit def letterValidator: Validator.Flat[Char, Letter] =
-    Validator.fromPredicate(_.isLetter, Letter())
+    implicit def digitShow: Show.Flat[Char, Digit] =
+      Show.instance(t => s"isDigit('$t')")
+  }
 
-  implicit def lowerCaseValidator: Validator.Flat[Char, LowerCase] =
-    Validator.fromPredicate(_.isLower, LowerCase())
+  object Letter {
 
-  implicit def upperCaseValidator: Validator.Flat[Char, UpperCase] =
-    Validator.fromPredicate(_.isUpper, UpperCase())
+    implicit def letterValidator: Validator.Flat[Char, Letter] =
+      Validator.fromPredicate(_.isLetter, Letter())
 
-  implicit def whitespaceValidator: Validator.Flat[Char, Whitespace] =
-    Validator.fromPredicate(_.isWhitespace, Whitespace())
-}
+    implicit def letterShow: Show.Flat[Char, Letter] =
+      Show.instance(t => s"isLetter('$t')")
+  }
 
-private[refined] trait CharShowInstances {
+  object LowerCase {
 
-  implicit def digitShow: Show.Flat[Char, Digit] =
-    Show.instance(t => s"isDigit('$t')")
+    implicit def lowerCaseValidator: Validator.Flat[Char, LowerCase] =
+      Validator.fromPredicate(_.isLower, LowerCase())
 
-  implicit def letterShow: Show.Flat[Char, Letter] =
-    Show.instance(t => s"isLetter('$t')")
+    implicit def lowerCaseShow: Show.Flat[Char, LowerCase] =
+      Show.instance(t => s"isLower('$t')")
+  }
 
-  implicit def lowerCaseShow: Show.Flat[Char, LowerCase] =
-    Show.instance(t => s"isLower('$t')")
+  object UpperCase {
 
-  implicit def upperCaseShow: Show.Flat[Char, UpperCase] =
-    Show.instance(t => s"isUpper('$t')")
+    implicit def upperCaseValidator: Validator.Flat[Char, UpperCase] =
+      Validator.fromPredicate(_.isUpper, UpperCase())
 
-  implicit def whitespaceShow: Show.Flat[Char, Whitespace] =
-    Show.instance(t => s"isWhitespace('$t')")
+    implicit def upperCaseShow: Show.Flat[Char, UpperCase] =
+      Show.instance(t => s"isUpper('$t')")
+  }
+
+  object Whitespace {
+
+    implicit def whitespaceValidator: Validator.Flat[Char, Whitespace] =
+      Validator.fromPredicate(_.isWhitespace, Whitespace())
+
+    implicit def whitespaceShow: Show.Flat[Char, Whitespace] =
+      Show.instance(t => s"isWhitespace('$t')")
+  }
 }

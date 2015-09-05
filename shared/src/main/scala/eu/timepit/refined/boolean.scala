@@ -163,8 +163,8 @@ private[refined] trait BooleanShowInstances {
 
       override def showResult(r: Res): String =
         r match {
-          case Passed(t, _) => s"Predicate ${showExpr(t)} did not pass."
-          case Failed(t, _) => s"Predicate ${showExpr(t)} did not fail."
+          case Passed(t, _) => s"Predicate ${s.showExpr(t)} did not pass."
+          case Failed(t, _) => s"Predicate ${s.showExpr(t)} did not fail."
         }
     }
 

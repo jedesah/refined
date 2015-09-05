@@ -56,17 +56,10 @@ object boolean extends BooleanValidators with BooleanShowInstances with BooleanI
   object Not {
 
     implicit def notValidator[T, P, R](implicit v: Validator[T, P, R]): Validator[T, Not[P], Not[v.Res]] =
-      new Validator[T, Not[P], Not[v.Res]] {
-        override def validate(t: T): Res = {
-          val r = v.validate(t)
-          r match {
-            case Passed(_, _) => Failed(t, Not(r))
-            case Failed(_, _) => Passed(t, Not(r))
-          }
-        }
-
-        override def isConstant: Boolean = v.isConstant
-      }
+      Validator.instance(t => {
+        val p = Not(v.validate(t))
+        Result.fromBoolean(p.p.isFailed, t, p)
+      }, v.isConstant)
 
     implicit def notShow[T, P, R](implicit s: Show[T, P, R]): Show[T, Not[P], Not[s.Res]] =
       new Show[T, Not[P], Not[s.Res]] {
@@ -85,50 +78,51 @@ object boolean extends BooleanValidators with BooleanShowInstances with BooleanI
     implicit def doubleNegationIntroduction[A, B](implicit p1: A ==> B): A ==> Not[Not[B]] =
       p1.adapt("doubleNegationIntroduction(%s)")
   }
+
+  object And {
+
+    implicit def andValidator[T, A, B, RA, RB](
+      implicit
+      va: Validator[T, A, RA], vb: Validator[T, B, RB]
+    ): Validator[T, A And B, va.Res And vb.Res] =
+      Validator.instance(t => {
+        val p = And(va.validate(t), vb.validate(t))
+        Result.fromBoolean(p.a.isPassed && p.b.isPassed, t, p)
+      }, va.isConstant && vb.isConstant)
+
+    implicit def conjunctionAssociativity[A, B, C]: ((A And B) And C) ==> (A And (B And C)) =
+      InferenceRule.alwaysValid("conjunctionAssociativity")
+
+    implicit def conjunctionCommutativity[A, B]: (A And B) ==> (B And A) =
+      InferenceRule.alwaysValid("conjunctionCommutativity")
+  }
+
+  object Or {
+
+    implicit def orValidator[T, A, B, RA, RB](
+      implicit
+      va: Validator[T, A, RA], vb: Validator[T, B, RB]
+    ): Validator[T, A Or B, va.Res Or vb.Res] =
+      Validator.instance(t => {
+        val p = Or(va.validate(t), vb.validate(t))
+        Result.fromBoolean(p.a.isPassed || p.b.isPassed, t, p)
+      }, va.isConstant && vb.isConstant)
+  }
+
+  object Xor {
+
+    implicit def xorValidator[T, A, B, RA, RB](
+      implicit
+      va: Validator[T, A, RA], vb: Validator[T, B, RB]
+    ): Validator[T, A Xor B, va.Res Xor vb.Res] =
+      Validator.instance(t => {
+        val p = Xor(va.validate(t), vb.validate(t))
+        Result.fromBoolean(p.a.isPassed ^ p.b.isPassed, t, p)
+      }, va.isConstant && vb.isConstant)
+  }
 }
 
 private[refined] trait BooleanValidators {
-
-  implicit def andValidator[T, A, B, RA, RB](
-    implicit
-    va: Validator[T, A, RA], vb: Validator[T, B, RB]
-  ): Validator[T, A And B, va.Res And vb.Res] =
-    Validator.instance(t => {
-      val p = And(va.validate(t), vb.validate(t))
-      (p.a, p.b) match {
-        case (Passed(_, _), Passed(_, _)) => Passed(t, p)
-        case _ => Failed(t, p)
-      }
-    }, va.isConstant && vb.isConstant)
-
-  implicit def orValidator[T, A, B, RA, RB](
-    implicit
-    va: Validator[T, A, RA], vb: Validator[T, B, RB]
-  ): Validator[T, A Or B, va.Res Or vb.Res] =
-    new Validator[T, A Or B, va.Res Or vb.Res] {
-      override def validate(t: T): Res =
-        (va.validate(t), vb.validate(t)) match {
-          case (ra @ Failed(_, _), rb @ Failed(_, _)) => Failed(t, Or(ra, rb))
-          case (ra, rb) => Passed(t, Or(ra, rb))
-        }
-
-      override val isConstant: Boolean = va.isConstant && vb.isConstant
-    }
-
-  implicit def xorValidator[T, A, B, RA, RB](
-    implicit
-    va: Validator[T, A, RA], vb: Validator[T, B, RB]
-  ): Validator[T, A Xor B, va.Res Xor vb.Res] =
-    new Validator[T, A Xor B, va.Res Xor vb.Res] {
-      override def validate(t: T): Res =
-        (va.validate(t), vb.validate(t)) match {
-          case (ra @ Failed(_, _), rb @ Failed(_, _)) => Failed(t, Xor(ra, rb))
-          case (ra @ Passed(_, _), rb @ Passed(_, _)) => Failed(t, Xor(ra, rb))
-          case (ra, rb) => Passed(t, Xor(ra, rb))
-        }
-
-      override val isConstant: Boolean = va.isConstant && vb.isConstant
-    }
 
   implicit def allOfHNilValidator[T]: Validator.Flat[T, AllOf[HNil]] =
     Validator.constant(t => Passed(t, AllOf(HList())))
@@ -303,12 +297,6 @@ private[refined] trait BooleanInferenceRules0 extends BooleanInferenceRules1 {
 
   implicit def minimalTautology[A]: A ==> A =
     InferenceRule.alwaysValid("minimalTautology")
-
-  implicit def conjunctionAssociativity[A, B, C]: ((A And B) And C) ==> (A And (B And C)) =
-    InferenceRule.alwaysValid("conjunctionAssociativity")
-
-  implicit def conjunctionCommutativity[A, B]: (A And B) ==> (B And A) =
-    InferenceRule.alwaysValid("conjunctionCommutativity")
 
   implicit def conjunctionEliminationR[A, B, C](implicit p1: B ==> C): (A And B) ==> C =
     p1.adapt("conjunctionEliminationR(%s)")

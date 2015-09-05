@@ -33,9 +33,14 @@ class BooleanShowSpec extends Properties("BooleanShow") {
     showExpr[And[True, False]](()) ?= "(true && false)"
   }
 
-  property("And.showResult") = secure {
+  property("And.showResult.Failed.R") = secure {
     showResult[And[True, False]](()) ?=
       "Right predicate of (true && false) failed: Predicate failed: false."
+  }
+
+  property("And.showResult.Failed.B") = secure {
+    showResult[And[False, False]](()) ?=
+      "Both predicates of (false && false) failed. Left: Predicate failed: false. Right: Predicate failed: false."
   }
 
   property("Or.showExpr") = secure {
@@ -50,4 +55,19 @@ class BooleanShowSpec extends Properties("BooleanShow") {
     showExpr[AllOf[Digit :: Letter :: Whitespace :: HNil]]('0') ?=
       "(isDigit('0') && (isLetter('0') && (isWhitespace('0') && true)))"
   }
+
+  /*
+
+  property("AnyOf[Digit :: LowerCase :: Whitespace :: HNil].show") = secure {
+    Predicate[AnyOf[Digit :: LowerCase :: Whitespace :: HNil], Char].show('c') ?=
+      "(isDigit('c') || (isLower('c') || (isWhitespace('c') || false)))"
+  }
+
+  property("OneOf[Digit :: LowerCase :: UpperCase :: HNil].show") = secure {
+    Predicate[OneOf[Digit :: LowerCase :: UpperCase :: HNil], Char].show('c') ?=
+      "oneOf(isDigit('c'), isLower('c'), isUpper('c'), false)"
+  }
+
+
+  */
 }

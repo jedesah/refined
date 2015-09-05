@@ -90,6 +90,26 @@ object boolean extends BooleanValidators with BooleanShowInstances with BooleanI
         Result.fromBoolean(p.a.isPassed && p.b.isPassed, t, p)
       }, va.isConstant && vb.isConstant)
 
+    implicit def andShow[T, A, B, RA, RB](
+      implicit
+      sa: Show[T, A, RA], sb: Show[T, B, RB]
+    ): Show[T, A And B, sa.Res And sb.Res] =
+      new Show[T, A And B, sa.Res And sb.Res] {
+        override def showExpr(t: T): String = s"(${sa.showExpr(t)} && ${sb.showExpr(t)})"
+
+        override def showResult(r: Res): String = {
+          val expr = showExpr(r.value)
+          val (ra, rb) = (r.predicate.a, r.predicate.b)
+          (ra, rb) match {
+            case (Passed(_, _), Passed(_, _)) => s"Both predicates of $expr passed."
+            case (Passed(_, _), Failed(_, _)) => s"Right predicate of $expr failed: ${sb.showResult(rb)}"
+            case (Failed(_, _), Passed(_, _)) => s"Left predicate of $expr failed: ${sa.showResult(ra)}"
+            case (Failed(_, _), Failed(_, _)) => s"Both predicates of $expr failed. " +
+              s"Left: ${sa.showResult(ra)} Right: ${sb.showResult(rb)}"
+          }
+        }
+      }
+
     implicit def conjunctionAssociativity[A, B, C]: ((A And B) And C) ==> (A And (B And C)) =
       InferenceRule.alwaysValid("conjunctionAssociativity")
 
@@ -107,6 +127,32 @@ object boolean extends BooleanValidators with BooleanShowInstances with BooleanI
         val p = Or(va.validate(t), vb.validate(t))
         Result.fromBoolean(p.a.isPassed || p.b.isPassed, t, p)
       }, va.isConstant && vb.isConstant)
+
+    implicit def orShow[T, A, B, RA, RB](
+      implicit
+      sa: Show[T, A, RA], sb: Show[T, B, RB]
+    ): Show[T, A Or B, sa.Res Or sb.Res] =
+      new Show[T, A Or B, sa.Res Or sb.Res] {
+        override def showExpr(t: T): String = s"(${sa.showExpr(t)} || ${sb.showExpr(t)})"
+
+        override def showResult(r: Res): String = {
+          val expr = showExpr(r.value)
+          val (ra, rb) = (r.predicate.a, r.predicate.b)
+          (ra, rb) match {
+            case (Passed(_, _), Passed(_, _)) => s"Both predicates of $expr passed."
+            case (Passed(_, _), Failed(_, _)) => s"Left predicate of $expr passed."
+            case (Failed(_, _), Passed(_, _)) => s"Right predicate of $expr passed."
+            case (Failed(_, _), Failed(_, _)) => s"Both predicates of $expr failed. " +
+              s"Left: ${sa.showResult(ra)} Right: ${sb.showResult(rb)}"
+          }
+        }
+      }
+
+    implicit def disjunctionAssociativity[A, B, C]: ((A Or B) Or C) ==> (A Or (B Or C)) =
+      InferenceRule.alwaysValid("disjunctionAssociativity")
+
+    implicit def disjunctionCommutativity[A, B]: (A Or B) ==> (B Or A) =
+      InferenceRule.alwaysValid("disjunctionCommutativity")
   }
 
   object Xor {
@@ -119,6 +165,21 @@ object boolean extends BooleanValidators with BooleanShowInstances with BooleanI
         val p = Xor(va.validate(t), vb.validate(t))
         Result.fromBoolean(p.a.isPassed ^ p.b.isPassed, t, p)
       }, va.isConstant && vb.isConstant)
+
+    implicit def xorCommutativity[A, B]: (A Xor B) ==> (B Xor A) =
+      InferenceRule.alwaysValid("xorCommutativity")
+  }
+
+  object AllOf {
+
+  }
+
+  object AnyOf {
+
+  }
+
+  object OneOf {
+
   }
 }
 
@@ -183,56 +244,6 @@ private[refined] trait BooleanValidators {
 }
 
 private[refined] trait BooleanShowInstances {
-
-  implicit def andShow[T, A, B, RA, RB](
-    implicit
-    sa: Show[T, A, RA], sb: Show[T, B, RB]
-  ): Show[T, A And B, sa.Res And sb.Res] =
-    new Show[T, A And B, sa.Res And sb.Res] {
-      override def showExpr(t: T): String = s"(${sa.showExpr(t)} && ${sb.showExpr(t)})"
-
-      override def showResult(r: Res): String = {
-        val expr = showExpr(r.value)
-        (r.predicate.a, r.predicate.b) match {
-          case (Passed(_, _), Passed(_, _)) =>
-            s"Both predicates of $expr passed."
-
-          case (ar @ Failed(_, _), br @ Failed(_, _)) =>
-            s"Both predicates of $expr failed. Left: ${sa.showResult(ar)} Right: ${sb.showResult(br)}"
-
-          case (ar @ Failed(_, _), _) =>
-            s"Left predicate of $expr failed: ${sa.showResult(ar)}"
-
-          case (_, br @ Failed(_, _)) =>
-            s"Right predicate of $expr failed: ${sb.showResult(br)}"
-        }
-      }
-    }
-
-  implicit def orShow[T, A, B, RA, RB](
-    implicit
-    sa: Show[T, A, RA], sb: Show[T, B, RB]
-  ): Show[T, A Or B, sa.Res Or sb.Res] =
-    new Show[T, A Or B, sa.Res Or sb.Res] {
-      override def showExpr(t: T): String = s"(${sa.showExpr(t)} || ${sb.showExpr(t)})"
-
-      override def showResult(r: Res): String = {
-        val expr = showExpr(r.value)
-        (r.predicate.a, r.predicate.b) match {
-          case (Passed(_, _), Passed(_, _)) =>
-            s"Both predicates of $expr passed."
-
-          case (Passed(_, _), _) =>
-            s"Left predicate of $expr passed."
-
-          case (_, Passed(_, _)) =>
-            s"Right predicate of $expr passed."
-
-          case (ar @ Failed(_, _), br @ Failed(_, _)) =>
-            s"Both predicates of $expr failed. Left: ${sa.showResult(ar)} Right: ${sb.showResult(br)}"
-        }
-      }
-    }
 
   implicit def xorShow[T, A, B, RA, RB](
     implicit
@@ -301,12 +312,6 @@ private[refined] trait BooleanInferenceRules0 extends BooleanInferenceRules1 {
   implicit def conjunctionEliminationR[A, B, C](implicit p1: B ==> C): (A And B) ==> C =
     p1.adapt("conjunctionEliminationR(%s)")
 
-  implicit def disjunctionAssociativity[A, B, C]: ((A Or B) Or C) ==> (A Or (B Or C)) =
-    InferenceRule.alwaysValid("disjunctionAssociativity")
-
-  implicit def disjunctionCommutativity[A, B]: (A Or B) ==> (B Or A) =
-    InferenceRule.alwaysValid("disjunctionCommutativity")
-
   implicit def disjunctionIntroductionL[A, B]: A ==> (A Or B) =
     InferenceRule.alwaysValid("disjunctionIntroductionL")
 
@@ -318,9 +323,6 @@ private[refined] trait BooleanInferenceRules0 extends BooleanInferenceRules1 {
 
   implicit def deMorgansLaw2[A, B]: Not[A Or B] ==> (Not[A] And Not[B]) =
     InferenceRule.alwaysValid("deMorgansLaw2")
-
-  implicit def xorCommutativity[A, B]: (A Xor B) ==> (B Xor A) =
-    InferenceRule.alwaysValid("xorCommutativity")
 
   implicit def modusTollens[A, B](implicit p1: A ==> B): Not[B] ==> Not[A] =
     p1.adapt("modusTollens(%s)")

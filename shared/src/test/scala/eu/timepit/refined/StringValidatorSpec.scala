@@ -72,7 +72,7 @@ class StringValidatorSpec extends Properties("StringValidator") {
   }
 
   property("Index.isValid") = forAll { (s: String) =>
-    isValid[Index[_1, Whitespace]](s) ?= s.lift(1).fold(false)(_.isWhitespace)
+    isValid[Index[W.`1`.T, Whitespace]](s) ?= s.lift(1).fold(false)(_.isWhitespace)
   }
 
   property("Last.isValid") = forAll { (s: String) =>

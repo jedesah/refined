@@ -99,7 +99,8 @@ object collection extends CollectionValidators with CollectionInferenceRules {
 
         override def showResult(r: Res): String = {
           val count = r.predicate.pa.count(_.isPassed)
-          s"${showExpr(r.value)} = $count: ${sc.showResult(r.predicate.pc)}"
+          val prefix = r.describeWith(s"taking ${showExpr(r.value)} = $count")
+          s"$prefix: ${sc.showResult(r.predicate.pc)}"
         }
       }
   }

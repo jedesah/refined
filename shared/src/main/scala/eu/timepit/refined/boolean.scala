@@ -166,6 +166,26 @@ object boolean extends BooleanValidators with BooleanShowInstances with BooleanI
         Result.fromBoolean(p.a.isPassed ^ p.b.isPassed, t, p)
       }, va.isConstant && vb.isConstant)
 
+    implicit def xorShow[T, A, B, RA, RB](
+      implicit
+      sa: Show[T, A, RA], sb: Show[T, B, RB]
+    ): Show[T, A Xor B, sa.Res Xor sb.Res] =
+      new Show[T, A Xor B, sa.Res Xor sb.Res] {
+        override def showExpr(t: T): String = s"(${sa.showExpr(t)} ^ ${sb.showExpr(t)})"
+
+        override def showResult(r: Res): String = {
+          val expr = showExpr(r.value)
+          val (ra, rb) = (r.predicate.a, r.predicate.b)
+          (ra, rb) match {
+            case (Passed(_, _), Passed(_, _)) => s"Both predicates of $expr passed."
+            case (Passed(_, _), Failed(_, _)) => s"Left predicate of $expr passed."
+            case (Failed(_, _), Passed(_, _)) => s"Right predicate of $expr passed."
+            case (Failed(_, _), Failed(_, _)) => s"Both predicates of $expr failed: " +
+              s"Left: ${sa.showResult(ra)} Right: ${sb.showResult(rb)}"
+          }
+        }
+      }
+
     implicit def xorCommutativity[A, B]: (A Xor B) ==> (B Xor A) =
       InferenceRule.alwaysValid("xorCommutativity")
   }
@@ -244,31 +264,6 @@ private[refined] trait BooleanValidators {
 }
 
 private[refined] trait BooleanShowInstances {
-
-  implicit def xorShow[T, A, B, RA, RB](
-    implicit
-    sa: Show[T, A, RA], sb: Show[T, B, RB]
-  ): Show[T, A Xor B, sa.Res Xor sb.Res] =
-    new Show[T, A Xor B, sa.Res Xor sb.Res] {
-      override def showExpr(t: T): String = s"(${sa.showExpr(t)} ^ ${sb.showExpr(t)})"
-
-      override def showResult(r: Res): String = {
-        val expr = showExpr(r.value)
-        (r.predicate.a, r.predicate.b) match {
-          case (Passed(_, _), Passed(_, _)) =>
-            s"Both predicates of $expr passed."
-
-          case (ar @ Failed(_, _), br @ Failed(_, _)) =>
-            s"Both predicates of $expr failed: Left: ${sa.showResult(ar)} Right: ${sb.showResult(br)}"
-
-          case (Passed(_, _), _) =>
-            s"Left predicate of $expr passed."
-
-          case (_, Passed(_, _)) =>
-            s"Right predicate of $expr passed."
-        }
-      }
-    }
 
   implicit def allOfHNilShow[T]: Show.Flat[T, AllOf[HNil]] =
     Show.instance(t => "true")

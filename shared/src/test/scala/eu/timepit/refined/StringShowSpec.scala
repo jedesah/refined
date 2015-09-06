@@ -49,6 +49,11 @@ class StringShowSpec extends Properties("StringShow") {
       "count(isDigit('a'), isDigit('b'), isDigit('1'), isDigit('2'))"
   }
 
+  property("Count.showResult") = secure {
+    showResult[Count[Digit, Greater[_2]]]("a12") ?=
+      "Predicate taking count(isDigit('a'), isDigit('1'), isDigit('2')) = 2 failed: Predicate failed: (2 > 2)."
+  }
+
   property("Empty.showExpr") = secure {
     showExpr[Empty]("test") ?= "isEmpty(test)"
   }

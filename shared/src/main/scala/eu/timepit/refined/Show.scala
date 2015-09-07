@@ -4,7 +4,7 @@ import eu.timepit.refined.Result.{Failed, Passed}
 
 import scala.util.{Failure, Success, Try}
 
-trait Show[T, P, R] extends Serializable {
+trait Show[T, P, R] extends Serializable { self =>
 
   final type Res = Result[T, R]
 
@@ -15,6 +15,12 @@ trait Show[T, P, R] extends Serializable {
 
   def accumulateShowExpr(t: T): List[String] =
     List(showExpr(t))
+
+  def contramap[U](f: U => T): Show[U, P, R] =
+    new Show[U, P, R] {
+      override def showExpr(t: U): String = self.showExpr(f(t))
+      override def showResult(r: Res): String = self.showResult(r.mapFst(f))
+    }
 }
 
 object Show {

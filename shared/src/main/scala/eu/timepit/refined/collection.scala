@@ -114,27 +114,54 @@ object collection extends CollectionValidators with CollectionInferenceRules {
       Show.instance(t => s"isEmpty($t)")
   }
 
+  object Forall {
+
+    implicit def forallValidator[A, P, R, T[a] <: TraversableOnce[a]](
+      implicit
+      v: Validator[A, P, R]
+    ): Validator[T[A], Forall[P], Forall[List[v.Res]]] =
+      Validator.instance(t => {
+        val rt = t.toList.map(v.validate)
+        Result.fromBoolean(rt.forall(_.isPassed), t, Forall(rt))
+      })
+
+    implicit def forallValidatorView[A, P, R, T](
+      implicit
+      v: Validator[A, P, R], ev: T => TraversableOnce[A]
+    ): Validator[T, Forall[P], Forall[List[v.Res]]] =
+      forallValidator.contramap(ev)
+
+    implicit def forallShow[A, P, R, T[a] <: TraversableOnce[a]](
+      implicit
+      s: Show[A, P, R]
+    ): Show[T[A], Forall[P], Forall[List[s.Res]]] =
+      new Show[T[A], Forall[P], Forall[List[s.Res]]] {
+        override def showExpr(t: T[A]): String = t.toList.map(s.showExpr).mkString("(", " && ", ")")
+
+        override def showResult(r: Res): String =
+          r match {
+            case Passed(_, _) => s"Predicate ${showExpr(r.value)} passed."
+            case Failed(_, _) => s"Predicate ${showExpr(r.value)} failed: " +
+              r.predicate.p.filter(_.isFailed).map(s.showResult).mkString(" ")
+          }
+      }
+
+    implicit def forallShowView[A, P, R, T](
+      implicit
+      s: Show[A, P, R], ev: T => TraversableOnce[A]
+    ): Show[T, Forall[P], Forall[List[s.Res]]] =
+      forallShow.contramap(ev)
+
+    implicit def existsInference[A, B](implicit p1: A ==> B): Exists[A] ==> Exists[B] =
+      p1.adapt("existsInference(%s)")
+  }
+
   object Size {
 
   }
 }
 
 private[refined] trait CollectionValidators {
-
-  implicit def forallValidator[A, P, R, T[a] <: TraversableOnce[a]](
-    implicit
-    v: Validator[A, P, R]
-  ): Validator[T[A], Forall[P], Forall[List[v.Res]]] =
-    Validator.instance(t => {
-      val rt = t.toList.map(v.validate)
-      Result.fromBoolean(rt.forall(_.isPassed), t, Forall(rt))
-    })
-
-  implicit def forallValidatorView[A, P, R, T](
-    implicit
-    v: Validator[A, P, R], ev: T => TraversableOnce[A]
-  ): Validator[T, Forall[P], Forall[List[v.Res]]] =
-    forallValidator.contramap(ev)
 
   implicit def headValidator[A, P, R, T[a] <: Traversable[a]](
     implicit
@@ -212,9 +239,6 @@ private[refined] trait CollectionValidators {
 }
 
 private[refined] trait CollectionInferenceRules {
-
-  implicit def existsInference[A, B](implicit p1: A ==> B): Exists[A] ==> Exists[B] =
-    p1.adapt("existsInference(%s)")
 
   implicit def existsNonEmptyInference[P]: Exists[P] ==> NonEmpty =
     InferenceRule.alwaysValid("existsNonEmptyInference")

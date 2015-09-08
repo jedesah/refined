@@ -2,6 +2,7 @@ package eu.timepit.refined
 
 import eu.timepit.refined.InferenceRule.==>
 import eu.timepit.refined.boolean._
+import eu.timepit.refined.numeric._
 import shapeless.nat._
 import shapeless.ops.nat.ToInt
 import shapeless.{Nat, Witness}
@@ -25,7 +26,7 @@ import shapeless.{Nat, Witness}
  * res2: Double @@ Greater[W.`1.5`.T] = 1.6
  * }}}
  */
-object numeric {
+object numeric extends NumericInferenceRules {
 
   /** Predicate that checks if a numeric value is less than `N`. */
   case class Less[N](n: N)
@@ -74,23 +75,6 @@ object numeric {
     implicit def lessShowNat[T, N <: Nat](implicit tn: ToInt[N]): Show.Flat[T, Less[N]] =
       Show.instance(t => s"($t < ${tn()})")
 
-    implicit def lessInferenceWit[C, A <: C, B <: C](
-      implicit
-      wa: Witness.Aux[A], wb: Witness.Aux[B], nc: Numeric[C]
-    ): Less[A] ==> Less[B] =
-      InferenceRule(nc.lt(wa.value, wb.value), s"lessInferenceWit(${wa.value}, ${wb.value})")
-
-    implicit def lessInferenceNat[A <: Nat, B <: Nat](
-      implicit
-      ta: ToInt[A], tb: ToInt[B]
-    ): Less[A] ==> Less[B] =
-      InferenceRule(ta() < tb(), s"lessInferenceNat(${ta()}, ${tb()})")
-
-    implicit def lessInferenceWitNat[C, A <: C, B <: Nat](
-      implicit
-      wa: Witness.Aux[A], tb: ToInt[B], nc: Numeric[C]
-    ): Less[A] ==> Less[B] =
-      InferenceRule(nc.lt(wa.value, nc.fromInt(tb())), s"lessInferenceWitNat(${wa.value}, ${tb()})")
   }
 
   object Greater {
@@ -113,22 +97,26 @@ object numeric {
     implicit def greaterShowNat[T, N <: Nat](implicit tn: ToInt[N]): Show.Flat[T, Greater[N]] =
       Show.instance(t => s"($t > ${tn()})")
 
-    implicit def greaterInferenceWit[C, A <: C, B <: C](
-      implicit
-      wa: Witness.Aux[A], wb: Witness.Aux[B], nc: Numeric[C]
-    ): Greater[A] ==> Greater[B] =
-      InferenceRule(nc.gt(wa.value, wb.value), s"greaterInferenceWit(${wa.value}, ${wb.value})")
-
-    implicit def greaterInferenceNat[A <: Nat, B <: Nat](
-      implicit
-      ta: ToInt[A], tb: ToInt[B]
-    ): Greater[A] ==> Greater[B] =
-      InferenceRule(ta() > tb(), s"greaterInferenceNat(${ta()}, ${tb()})")
-
-    implicit def greaterInferenceWitNat[C, A <: C, B <: Nat](
-      implicit
-      wa: Witness.Aux[A], tb: ToInt[B], nc: Numeric[C]
-    ): Greater[A] ==> Greater[B] =
-      InferenceRule(nc.gt(wa.value, nc.fromInt(tb())), s"greaterInferenceWitNat(${wa.value}, ${tb()})")
   }
+}
+
+private[refined] trait NumericInferenceRules {
+
+  implicit def lessInferenceWit[C, A <: C, B <: C](implicit wa: Witness.Aux[A], wb: Witness.Aux[B], nc: Numeric[C]): Less[A] ==> Less[B] =
+    InferenceRule(nc.lt(wa.value, wb.value), s"lessInferenceWit(${wa.value}, ${wb.value})")
+
+  implicit def lessInferenceNat[A <: Nat, B <: Nat](implicit ta: ToInt[A], tb: ToInt[B]): Less[A] ==> Less[B] =
+    InferenceRule(ta() < tb(), s"lessInferenceNat(${ta()}, ${tb()})")
+
+  implicit def lessInferenceWitNat[C, A <: C, B <: Nat](implicit wa: Witness.Aux[A], tb: ToInt[B], nc: Numeric[C]): Less[A] ==> Less[B] =
+    InferenceRule(nc.lt(wa.value, nc.fromInt(tb())), s"lessInferenceWitNat(${wa.value}, ${tb()})")
+
+  implicit def greaterInferenceWit[C, A <: C, B <: C](implicit wa: Witness.Aux[A], wb: Witness.Aux[B], nc: Numeric[C]): Greater[A] ==> Greater[B] =
+    InferenceRule(nc.gt(wa.value, wb.value), s"greaterInferenceWit(${wa.value}, ${wb.value})")
+
+  implicit def greaterInferenceNat[A <: Nat, B <: Nat](implicit ta: ToInt[A], tb: ToInt[B]): Greater[A] ==> Greater[B] =
+    InferenceRule(ta() > tb(), s"greaterInferenceNat(${ta()}, ${tb()})")
+
+  implicit def greaterInferenceWitNat[C, A <: C, B <: Nat](implicit wa: Witness.Aux[A], tb: ToInt[B], nc: Numeric[C]): Greater[A] ==> Greater[B] =
+    InferenceRule(nc.gt(wa.value, nc.fromInt(tb())), s"greaterInferenceWitNat(${wa.value}, ${tb()})")
 }

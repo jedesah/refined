@@ -94,9 +94,6 @@ private[refined] trait GenericInferenceRules {
   implicit def equalValidatorInference[T, U <: T, P, R](implicit v: Validator[T, P, R], wu: Witness.Aux[U]): Equal[U] ==> P =
     InferenceRule(v.isValid(wu.value), s"equalValidatorInference(${wu.value})")
 
-  implicit def equalValidatorInferenceNat[T, P, R, N <: Nat](
-    implicit
-    v: Validator[T, P, R], nt: Numeric[T], tn: ToInt[N]
-  ): Equal[N] ==> P =
+  implicit def equalValidatorInferenceNat[T, P, R, N <: Nat](implicit v: Validator[T, P, R], nt: Numeric[T], tn: ToInt[N]): Equal[N] ==> P =
     InferenceRule(v.isValid(nt.fromInt(tn())), s"equalValidatorInferenceNat(${nt.fromInt(tn())})")
 }

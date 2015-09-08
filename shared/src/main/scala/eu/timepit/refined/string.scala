@@ -1,9 +1,10 @@
 package eu.timepit.refined
 
 import eu.timepit.refined.InferenceRule.==>
+import eu.timepit.refined.string._
 import shapeless.Witness
 
-object string {
+object string extends StringInferenceRules {
 
   /** Predicate that checks if a `String` ends with the suffix `S`. */
   case class EndsWith[S](s: S)
@@ -39,12 +40,6 @@ object string {
 
     implicit def endsWithShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, EndsWith[S]] =
       Show.instance(t => s""""$t".endsWith("${ws.value}")""")
-
-    implicit def endsWithInference[A <: String, B <: String](
-      implicit
-      wa: Witness.Aux[A], wb: Witness.Aux[B]
-    ): EndsWith[A] ==> EndsWith[B] =
-      InferenceRule(wa.value.endsWith(wb.value), s"endsWithInference(${wa.value}, ${wb.value})")
   }
 
   object MatchesRegex {
@@ -72,12 +67,6 @@ object string {
 
     implicit def startsWithShow[S <: String](implicit ws: Witness.Aux[S]): Show.Flat[String, StartsWith[S]] =
       Show.instance(t => s""""$t".startsWith("${ws.value}")""")
-
-    implicit def startsWithInference[A <: String, B <: String](
-      implicit
-      wa: Witness.Aux[A], wb: Witness.Aux[B]
-    ): StartsWith[A] ==> StartsWith[B] =
-      InferenceRule(wa.value.startsWith(wb.value), s"startsWithInference(${wa.value}, ${wb.value})")
   }
 
   object Uri {
@@ -130,4 +119,13 @@ object string {
     implicit def xpathShow: Show.Flat[String, XPath] =
       Show.fromPartial(pf, "XPath")
   }
+}
+
+private[refined] trait StringInferenceRules {
+
+  implicit def endsWithInference[A <: String, B <: String](implicit wa: Witness.Aux[A], wb: Witness.Aux[B]): EndsWith[A] ==> EndsWith[B] =
+    InferenceRule(wa.value.endsWith(wb.value), s"endsWithInference(${wa.value}, ${wb.value})")
+
+  implicit def startsWithInference[A <: String, B <: String](implicit wa: Witness.Aux[A], wb: Witness.Aux[B]): StartsWith[A] ==> StartsWith[B] =
+    InferenceRule(wa.value.startsWith(wb.value), s"startsWithInference(${wa.value}, ${wb.value})")
 }

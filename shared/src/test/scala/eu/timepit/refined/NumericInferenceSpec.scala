@@ -21,11 +21,9 @@ class NumericInferenceSpec extends Properties("NumericInference") {
     InferenceRule[LessEqual[W.`7.2`.T], LessEqual[W.`7.5`.T]].isValid
   }
 
-  /*
   property("LessEqual[A] ==> LessEqual[A]") = secure {
     InferenceRule[LessEqual[W.`1`.T], LessEqual[W.`1`.T]].isValid
   }
-  */
 
   property("LessEqual[A] =!> LessEqual[B]") = secure {
     InferenceRule[LessEqual[W.`7.5`.T], LessEqual[W.`7.2`.T]].notValid

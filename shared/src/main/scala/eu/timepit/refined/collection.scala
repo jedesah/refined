@@ -151,9 +151,6 @@ object collection extends CollectionValidators with CollectionInferenceRules {
       s: Show[A, P, R], ev: T => TraversableOnce[A]
     ): Show[T, Forall[P], Forall[List[s.Res]]] =
       forallShow.contramap(ev)
-
-    implicit def existsInference[A, B](implicit p1: A ==> B): Exists[A] ==> Exists[B] =
-      p1.adapt("existsInference(%s)")
   }
 
   object Size {
@@ -239,6 +236,9 @@ private[refined] trait CollectionValidators {
 }
 
 private[refined] trait CollectionInferenceRules {
+
+  implicit def existsInference[A, B](implicit p1: A ==> B): Exists[A] ==> Exists[B] =
+    p1.adapt("existsInference(%s)")
 
   implicit def existsNonEmptyInference[P]: Exists[P] ==> NonEmpty =
     InferenceRule.alwaysValid("existsNonEmptyInference")

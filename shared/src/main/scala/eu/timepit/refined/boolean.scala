@@ -71,12 +71,6 @@ object boolean extends BooleanInferenceRules0 {
             case Failed(t, _) => s"Predicate ${s.showExpr(t)} did not fail."
           }
       }
-
-    implicit def doubleNegationElimination[A, B](implicit p1: A ==> B): Not[Not[A]] ==> B =
-      p1.adapt("doubleNegationElimination(%s)")
-
-    implicit def doubleNegationIntroduction[A, B](implicit p1: A ==> B): A ==> Not[Not[B]] =
-      p1.adapt("doubleNegationIntroduction(%s)")
   }
 
   object And {
@@ -109,12 +103,6 @@ object boolean extends BooleanInferenceRules0 {
           }
         }
       }
-
-    implicit def conjunctionAssociativity[A, B, C]: ((A And B) And C) ==> (A And (B And C)) =
-      InferenceRule.alwaysValid("conjunctionAssociativity")
-
-    implicit def conjunctionCommutativity[A, B]: (A And B) ==> (B And A) =
-      InferenceRule.alwaysValid("conjunctionCommutativity")
   }
 
   object Or {
@@ -147,12 +135,6 @@ object boolean extends BooleanInferenceRules0 {
           }
         }
       }
-
-    implicit def disjunctionAssociativity[A, B, C]: ((A Or B) Or C) ==> (A Or (B Or C)) =
-      InferenceRule.alwaysValid("disjunctionAssociativity")
-
-    implicit def disjunctionCommutativity[A, B]: (A Or B) ==> (B Or A) =
-      InferenceRule.alwaysValid("disjunctionCommutativity")
   }
 
   object Xor {
@@ -185,9 +167,6 @@ object boolean extends BooleanInferenceRules0 {
           }
         }
       }
-
-    implicit def xorCommutativity[A, B]: (A Xor B) ==> (B Xor A) =
-      InferenceRule.alwaysValid("xorCommutativity")
   }
 
   object AllOf {
@@ -290,8 +269,26 @@ private[refined] trait BooleanInferenceRules0 extends BooleanInferenceRules1 {
   implicit def minimalTautology[A]: A ==> A =
     InferenceRule.alwaysValid("minimalTautology")
 
+  implicit def doubleNegationElimination[A, B](implicit p1: A ==> B): Not[Not[A]] ==> B =
+    p1.adapt("doubleNegationElimination(%s)")
+
+  implicit def doubleNegationIntroduction[A, B](implicit p1: A ==> B): A ==> Not[Not[B]] =
+    p1.adapt("doubleNegationIntroduction(%s)")
+
+  implicit def conjunctionAssociativity[A, B, C]: ((A And B) And C) ==> (A And (B And C)) =
+    InferenceRule.alwaysValid("conjunctionAssociativity")
+
+  implicit def conjunctionCommutativity[A, B]: (A And B) ==> (B And A) =
+    InferenceRule.alwaysValid("conjunctionCommutativity")
+
   implicit def conjunctionEliminationR[A, B, C](implicit p1: B ==> C): (A And B) ==> C =
     p1.adapt("conjunctionEliminationR(%s)")
+
+  implicit def disjunctionAssociativity[A, B, C]: ((A Or B) Or C) ==> (A Or (B Or C)) =
+    InferenceRule.alwaysValid("disjunctionAssociativity")
+
+  implicit def disjunctionCommutativity[A, B]: (A Or B) ==> (B Or A) =
+    InferenceRule.alwaysValid("disjunctionCommutativity")
 
   implicit def disjunctionIntroductionL[A, B]: A ==> (A Or B) =
     InferenceRule.alwaysValid("disjunctionIntroductionL")
@@ -304,6 +301,9 @@ private[refined] trait BooleanInferenceRules0 extends BooleanInferenceRules1 {
 
   implicit def deMorgansLaw2[A, B]: Not[A Or B] ==> (Not[A] And Not[B]) =
     InferenceRule.alwaysValid("deMorgansLaw2")
+
+  implicit def xorCommutativity[A, B]: (A Xor B) ==> (B Xor A) =
+    InferenceRule.alwaysValid("xorCommutativity")
 
   implicit def modusTollens[A, B](implicit p1: A ==> B): Not[B] ==> Not[A] =
     p1.adapt("modusTollens(%s)")

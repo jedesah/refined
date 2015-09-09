@@ -2,48 +2,34 @@ package eu.timepit.refined
 
 import eu.timepit.refined.Result.{Failed, Passed}
 
-sealed abstract class Result[T, P] extends Product with Serializable {
+sealed abstract class Result[A] extends Product with Serializable {
 
-  def value: T
+  def detail: A
 
-  def predicate: P
-
-  def fold[A](ifPassed: (T, P) => A, ifFailed: (T, P) => A): A =
+  def fold[B](ifPassed: A => B, ifFailed: A => B): B =
     this match {
-      case Passed(t, p) => ifPassed(t, p)
-      case Failed(t, p) => ifFailed(t, p)
+      case Passed(d) => ifPassed(d)
+      case Failed(d) => ifFailed(d)
     }
 
-  def replace[A](ifPassed: A, ifFailed: A): A =
-    fold((_, _) => ifPassed, (_, _) => ifFailed)
+  def replace[B](ifPassed: B, ifFailed: B): B =
+    fold(_ => ifPassed, _ => ifFailed)
 
-  def mapBoth[U, Q](f: T => U, g: P => Q): Result[U, Q] =
-    fold((t, p) => Passed(f(t), g(p)), (t, p) => Failed(f(t), g(p)))
-
-  def mapFst[U](f: T => U): Result[U, P] =
-    mapBoth(f, identity)
+  def map[B](f: A => B): Result[B] =
+    fold(d => Passed(f(d)), d => Failed(f(d)))
 
   def isPassed: Boolean =
     replace(true, false)
 
   def isFailed: Boolean =
     replace(false, true)
-
-  def toVerb: String =
-    replace("passed", "failed")
-
-  def describe: String =
-    s"Predicate $toVerb"
-
-  def describeWith(detail: String): String =
-    s"Predicate $detail $toVerb"
 }
 
 object Result {
 
-  final case class Passed[T, P](value: T, predicate: P) extends Result[T, P]
-  final case class Failed[T, P](value: T, predicate: P) extends Result[T, P]
+  final case class Passed[A](detail: A) extends Result[A]
+  final case class Failed[A](detail: A) extends Result[A]
 
-  def fromBoolean[T, P](b: Boolean, t: T, p: P): Result[T, P] =
-    if (b) Passed(t, p) else Failed(t, p)
+  def fromBoolean[A](b: Boolean, detail: A): Result[A] =
+    if (b) Passed(detail) else Failed(detail)
 }

@@ -86,7 +86,7 @@ object collection extends CollectionValidators with CollectionInferenceRules {
       Validator.instance(t => {
         val ra = t.toList.map(va.validate)
         val rc = vc.validate(ra.count(_.isPassed))
-        rc.mapBoth(_ => t, _ => Count(ra, rc))
+        rc.map(_ => Count(ra, rc))
       })
 
     implicit def countShow[A, PA, RA, PC, RC, T](
@@ -97,10 +97,10 @@ object collection extends CollectionValidators with CollectionInferenceRules {
         override def showExpr(t: T): String =
           t.toList.map(sa.showExpr).mkString("count(", ", ", ")")
 
-        override def showResult(r: Res): String = {
-          val count = r.predicate.pa.count(_.isPassed)
-          val prefix = r.describeWith(s"taking ${showExpr(r.value)} = $count")
-          s"$prefix: ${sc.showResult(r.predicate.pc)}"
+        override def showResult(t: T, r: Res): String = {
+          val count = r.detail.pa.count(_.isPassed)
+          val prefix = "" //r.describeWith(s"taking ${showExpr(r.value)} = $count")
+          s"$prefix: ${sc.showResult(count, r.detail.pc)}"
         }
       }
   }
@@ -122,7 +122,7 @@ object collection extends CollectionValidators with CollectionInferenceRules {
     ): Validator[T[A], Forall[P], Forall[List[v.Res]]] =
       Validator.instance(t => {
         val rt = t.toList.map(v.validate)
-        Result.fromBoolean(rt.forall(_.isPassed), t, Forall(rt))
+        Result.fromBoolean(rt.forall(_.isPassed), Forall(rt))
       })
 
     implicit def forallValidatorView[A, P, R, T](
@@ -138,11 +138,11 @@ object collection extends CollectionValidators with CollectionInferenceRules {
       new Show[T[A], Forall[P], Forall[List[s.Res]]] {
         override def showExpr(t: T[A]): String = t.toList.map(s.showExpr).mkString("(", " && ", ")")
 
-        override def showResult(r: Res): String =
+        override def showResult(t: T[A], r: Res): String =
           r match {
-            case Passed(_, _) => s"Predicate ${showExpr(r.value)} passed."
-            case Failed(_, _) => s"Predicate ${showExpr(r.value)} failed: " +
-              r.predicate.p.filter(_.isFailed).map(s.showResult).mkString(" ")
+            case Passed(_) => s"Predicate ${showExpr(t)} passed."
+            case Failed(_) => s"Predicate ${showExpr(t)} failed: " //+
+            //r.detail.p.filter(_.isFailed).map(a => s.showResult(t, a)).mkString(" ")
           }
       }
 
@@ -167,8 +167,8 @@ private[refined] trait CollectionValidators {
     Validator.instance(t => t.headOption match {
       case Some(a) =>
         val rv = v.validate(a)
-        rv.mapBoth(_ => t, _ => Head(Some(rv)))
-      case None => Failed(t, Head(None))
+        rv.map(_ => Head(Some(rv)))
+      case None => Failed(Head(None))
     })
 
   implicit def headValidatorView[A, P, R, T](
@@ -186,8 +186,8 @@ private[refined] trait CollectionValidators {
     Validator.instance(t => t.lift(wn.value) match {
       case Some(a) =>
         val rv = v.validate(a)
-        rv.mapBoth(_ => t, _ => Index(wn.value, Some(rv)))
-      case None => Failed(t, Index(wn.value, None))
+        rv.map(_ => Index(wn.value, Some(rv)))
+      case None => Failed(Index(wn.value, None))
     })
 
   implicit def lastValidator[A, P, R, T[a] <: Traversable[a]](
@@ -197,8 +197,8 @@ private[refined] trait CollectionValidators {
     Validator.instance(t => t.lastOption match {
       case Some(a) =>
         val rv = v.validate(a)
-        rv.mapBoth(_ => t, _ => Last(Some(rv)))
-      case None => Failed(t, Last(None))
+        rv.map(_ => Last(Some(rv)))
+      case None => Failed(Last(None))
     })
 
   implicit def lastValidatorView[A, P, R, T](
@@ -213,7 +213,7 @@ private[refined] trait CollectionValidators {
   ): Validator[T, Size[P], Size[v.Res]] =
     Validator.instance(t => {
       val rv = v.validate(t.size)
-      rv.mapBoth(_ => t, _ => Size(rv))
+      rv.map(_ => Size(rv))
     })
 
   implicit def sizeShow[T, P, R](
@@ -223,14 +223,14 @@ private[refined] trait CollectionValidators {
     new Show[T, Size[P], Size[s.Res]] {
       override def showExpr(t: T): String = s.showExpr(t.size)
 
-      override def showResult(r: Res): String = {
-        val size = r.value.size
-        val nested = s.showResult(r.predicate.p)
+      override def showResult(t: T, r: Res): String = {
+        val size = t.size
+        val nested = s.showResult(size, r.detail.p)
 
         def msg(result: String) =
-          s"Predicate taking size(${r.value}) = $size $result: $nested"
+          s"Predicate taking size(${t}) = $size $result: $nested"
 
-        r.fold((_, _) => msg("passed"), (_, _) => msg("failed"))
+        r.fold(_ => msg("passed"), _ => msg("failed"))
       }
     }
 }

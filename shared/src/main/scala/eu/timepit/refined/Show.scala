@@ -6,12 +6,12 @@ import scala.util.{Failure, Success, Try}
 
 trait Show[T, P, R] extends Serializable { self =>
 
-  final type Res = Result[T, R]
+  final type Res = Result[R]
 
   def showExpr(t: T): String
 
-  def showResult(r: Res): String =
-    s"${r.describe}: ${showExpr(r.value)}."
+  def showResult(t: T, r: Res): String =
+    s": ${showExpr(t)}."
 
   def accumulateShowExpr(t: T): List[String] =
     List(showExpr(t))
@@ -19,7 +19,7 @@ trait Show[T, P, R] extends Serializable { self =>
   def contramap[U](f: U => T): Show[U, P, R] =
     new Show[U, P, R] {
       override def showExpr(t: U): String = self.showExpr(f(t))
-      override def showResult(r: Res): String = self.showResult(r.mapFst(f))
+      override def showResult(t: U, r: Res): String = self.showResult(f(t), r)
     }
 }
 
@@ -37,9 +37,9 @@ object Show {
       override def showExpr(t: T): String =
         s"""isValid$name("$t")"""
 
-      override def showResult(r: Res): String = {
-        val prefix = s"$name predicate ${r.toVerb}"
-        val suffix = Try(pf(r.value)) match {
+      override def showResult(t: T, r: Res): String = {
+        val prefix = s"$name predicate "
+        val suffix = Try(pf(t)) match {
           case Success(_) => "."
           case Failure(e) => ": " + e.getMessage
         }

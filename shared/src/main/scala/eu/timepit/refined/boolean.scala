@@ -38,7 +38,7 @@ object boolean extends BooleanInferenceRules0 {
   object True {
 
     implicit def trueValidator[T]: Validator.Flat[T, True] =
-      Validator.constant(t => Passed(t, True()))
+      Validator.constant(t => Passed(True()))
 
     implicit def trueShow[T]: Show.Flat[T, True] =
       Show.instance(_ => "true")
@@ -47,7 +47,7 @@ object boolean extends BooleanInferenceRules0 {
   object False {
 
     implicit def falseValidator[T]: Validator.Flat[T, False] =
-      Validator.constant(t => Failed(t, False()))
+      Validator.constant(t => Failed(False()))
 
     implicit def falseShow[T]: Show.Flat[T, False] =
       Show.instance(_ => "false")
@@ -58,7 +58,7 @@ object boolean extends BooleanInferenceRules0 {
     implicit def notValidator[T, P, R](implicit v: Validator[T, P, R]): Validator[T, Not[P], Not[v.Res]] =
       Validator.instance(t => {
         val p = Not(v.validate(t))
-        Result.fromBoolean(p.p.isFailed, t, p)
+        Result.fromBoolean(p.p.isFailed, p)
       }, v.isConstant)
 
     implicit def notShow[T, P, R](implicit s: Show[T, P, R]): Show[T, Not[P], Not[s.Res]] =
@@ -81,7 +81,7 @@ object boolean extends BooleanInferenceRules0 {
     ): Validator[T, A And B, va.Res And vb.Res] =
       Validator.instance(t => {
         val p = And(va.validate(t), vb.validate(t))
-        Result.fromBoolean(p.a.isPassed && p.b.isPassed, t, p)
+        Result.fromBoolean(p.a.isPassed && p.b.isPassed, p)
       }, va.isConstant && vb.isConstant)
 
     implicit def andShow[T, A, B, RA, RB](
@@ -91,15 +91,15 @@ object boolean extends BooleanInferenceRules0 {
       new Show[T, A And B, sa.Res And sb.Res] {
         override def showExpr(t: T): String = s"(${sa.showExpr(t)} && ${sb.showExpr(t)})"
 
-        override def showResult(r: Res): String = {
-          val expr = showExpr(r.value)
-          val (ra, rb) = (r.predicate.a, r.predicate.b)
+        override def showResult(t: T, r: Res): String = {
+          val expr = showExpr(t)
+          val (ra, rb) = (r.detail.a, r.detail.b)
           (ra, rb) match {
-            case (Passed(_, _), Passed(_, _)) => s"Both predicates of $expr passed."
-            case (Passed(_, _), Failed(_, _)) => s"Right predicate of $expr failed: ${sb.showResult(rb)}"
-            case (Failed(_, _), Passed(_, _)) => s"Left predicate of $expr failed: ${sa.showResult(ra)}"
-            case (Failed(_, _), Failed(_, _)) => s"Both predicates of $expr failed. " +
-              s"Left: ${sa.showResult(ra)} Right: ${sb.showResult(rb)}"
+            case (Passed(_), Passed(_)) => s"Both predicates of $expr passed."
+            case (Passed(_), Failed(_)) => s"Right predicate of $expr failed: ${sb.showResult(rb)}"
+            case (Failed(_), Passed(_)) => s"Left predicate of $expr failed: ${sa.showResult(ra)}"
+            case (Failed(_), Failed(_)) => s"Both predicates of $expr failed. " +
+              s"Left: ${sa.showResult(t, ra)} Right: ${sb.showResult(t, rb)}"
           }
         }
       }
@@ -113,7 +113,7 @@ object boolean extends BooleanInferenceRules0 {
     ): Validator[T, A Or B, va.Res Or vb.Res] =
       Validator.instance(t => {
         val p = Or(va.validate(t), vb.validate(t))
-        Result.fromBoolean(p.a.isPassed || p.b.isPassed, t, p)
+        Result.fromBoolean(p.a.isPassed || p.b.isPassed, p)
       }, va.isConstant && vb.isConstant)
 
     implicit def orShow[T, A, B, RA, RB](
@@ -123,15 +123,15 @@ object boolean extends BooleanInferenceRules0 {
       new Show[T, A Or B, sa.Res Or sb.Res] {
         override def showExpr(t: T): String = s"(${sa.showExpr(t)} || ${sb.showExpr(t)})"
 
-        override def showResult(r: Res): String = {
-          val expr = showExpr(r.value)
-          val (ra, rb) = (r.predicate.a, r.predicate.b)
+        override def showResult(t: T, r: Res): String = {
+          val expr = showExpr(t)
+          val (ra, rb) = (r.detail.a, r.detail.b)
           (ra, rb) match {
             case (Passed(_, _), Passed(_, _)) => s"Both predicates of $expr passed."
             case (Passed(_, _), Failed(_, _)) => s"Left predicate of $expr passed."
             case (Failed(_, _), Passed(_, _)) => s"Right predicate of $expr passed."
             case (Failed(_, _), Failed(_, _)) => s"Both predicates of $expr failed. " +
-              s"Left: ${sa.showResult(ra)} Right: ${sb.showResult(rb)}"
+              s"Left: ${sa.showResult(t, ra)} Right: ${sb.showResult(t, rb)}"
           }
         }
       }
@@ -155,15 +155,15 @@ object boolean extends BooleanInferenceRules0 {
       new Show[T, A Xor B, sa.Res Xor sb.Res] {
         override def showExpr(t: T): String = s"(${sa.showExpr(t)} ^ ${sb.showExpr(t)})"
 
-        override def showResult(r: Res): String = {
-          val expr = showExpr(r.value)
-          val (ra, rb) = (r.predicate.a, r.predicate.b)
+        override def showResult(t: T, r: Res): String = {
+          val expr = showExpr(t)
+          val (ra, rb) = (r.detail.a, r.detail.b)
           (ra, rb) match {
             case (Passed(_, _), Passed(_, _)) => s"Both predicates of $expr passed."
             case (Passed(_, _), Failed(_, _)) => s"Left predicate of $expr passed."
             case (Failed(_, _), Passed(_, _)) => s"Right predicate of $expr passed."
             case (Failed(_, _), Failed(_, _)) => s"Both predicates of $expr failed. " +
-              s"Left: ${sa.showResult(ra)} Right: ${sb.showResult(rb)}"
+              s"Left: ${sa.showResult(t, ra)} Right: ${sb.showResult(t, rb)}"
           }
         }
       }
@@ -172,7 +172,7 @@ object boolean extends BooleanInferenceRules0 {
   object AllOf {
 
     implicit def allOfHNilValidator[T]: Validator.Flat[T, AllOf[HNil]] =
-      Validator.constant(t => Passed(t, AllOf(HList())))
+      Validator.constant(t => Passed(AllOf(HList())))
 
     implicit def allOfHConsValidator[T, PH, PT <: HList, RH, RT <: HList](
       implicit
@@ -181,7 +181,7 @@ object boolean extends BooleanInferenceRules0 {
       Validator.instance(t => {
         val rh = vh.validate(t)
         val rt = vt.validate(t)
-        Result.fromBoolean(rh.isPassed && rt.isPassed, t, AllOf(rh :: rt.predicate.ps))
+        Result.fromBoolean(rh.isPassed && rt.isPassed, AllOf(rh :: rt.detail.ps))
       }, vh.isConstant && vt.isConstant)
 
     implicit def allOfHNilShow[T]: Show.Flat[T, AllOf[HNil]] =
@@ -203,7 +203,7 @@ object boolean extends BooleanInferenceRules0 {
   object AnyOf {
 
     implicit def anyOfHNilValidator[T]: Validator.Flat[T, AnyOf[HNil]] =
-      Validator.constant(t => Failed(t, AnyOf(HList())))
+      Validator.constant(t => Failed(AnyOf(HList())))
 
     implicit def anyOfHConsValidator[T, PH, PT <: HList, RH, RT <: HList](
       implicit
@@ -212,7 +212,7 @@ object boolean extends BooleanInferenceRules0 {
       Validator.instance(t => {
         val rh = vh.validate(t)
         val rt = vt.validate(t)
-        Result.fromBoolean(rh.isPassed || rt.isPassed, t, AnyOf(rh :: rt.predicate.ps))
+        Result.fromBoolean(rh.isPassed || rt.isPassed, AnyOf(rh :: rt.detail.ps))
       }, vh.isConstant && vt.isConstant)
 
     implicit def anyOfHNilShow[T]: Show.Flat[T, AnyOf[HNil]] =
@@ -234,17 +234,17 @@ object boolean extends BooleanInferenceRules0 {
   object OneOf {
 
     implicit def oneOfHNilValidator[T]: Validator.Flat[T, OneOf[HNil]] =
-      Validator.constant(t => Failed(t, OneOf(HList())))
+      Validator.constant(t => Failed(OneOf(HList())))
 
     implicit def oneOfHConsValidator[T, PH, PT <: HList, RH, RT <: HList](
       implicit
-      vh: Validator[T, PH, RH], vt: Validator[T, OneOf[PT], OneOf[RT]], toList: ToList[RT, Result[_, _]]
+      vh: Validator[T, PH, RH], vt: Validator[T, OneOf[PT], OneOf[RT]], toList: ToList[RT, Result[_]]
     ): Validator[T, OneOf[PH :: PT], OneOf[vh.Res :: RT]] =
       Validator.instance(t => {
         val rh = vh.validate(t)
-        val rt = vt.validate(t).predicate.ps
+        val rt = vt.validate(t).detail.ps
         val passed = (rh :: toList(rt)).count(_.isPassed) == 1
-        Result.fromBoolean(passed, t, OneOf(rh :: rt))
+        Result.fromBoolean(passed, OneOf(rh :: rt))
       }, vh.isConstant && vt.isConstant)
 
     implicit def oneOfHNilShow[T]: Show.Flat[T, OneOf[HNil]] =

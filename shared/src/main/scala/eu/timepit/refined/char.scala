@@ -4,7 +4,7 @@ import eu.timepit.refined.api.{Show, Validate}
 import eu.timepit.refined.boolean.Or
 import eu.timepit.refined.char._
 
-object char extends CharPredicates with CharInstances {
+object char extends CharInstances {
 
   /** Predicate that checks if a `Char` is a digit. */
   case class Digit()
@@ -25,21 +25,6 @@ object char extends CharPredicates with CharInstances {
   type LetterOrDigit = Letter Or Digit
 }
 
-private[refined] trait CharPredicates {
-
-  implicit def letterPredicate: Predicate[Letter, Char] =
-    Predicate.instance(_.isLetter, t => s"isLetter('$t')")
-
-  implicit def lowerCasePredicate: Predicate[LowerCase, Char] =
-    Predicate.instance(_.isLower, t => s"isLower('$t')")
-
-  implicit def upperCasePredicate: Predicate[UpperCase, Char] =
-    Predicate.instance(_.isUpper, t => s"isUpper('$t')")
-
-  implicit def whitespacePredicate: Predicate[Whitespace, Char] =
-    Predicate.instance(_.isWhitespace, t => s"isWhitespace('$t')")
-}
-
 private[refined] trait CharInstances {
 
   implicit def digitValidate: Validate.Flat[Char, Digit] =
@@ -47,4 +32,28 @@ private[refined] trait CharInstances {
 
   implicit def digitShow: Show.Flat[Char, Digit] =
     Show.instance(t => s"isDigit('$t')")
+
+  implicit def letterValidate: Validate.Flat[Char, Letter] =
+    Validate.fromPredicate(_.isLetter, Letter())
+
+  implicit def letterShow: Show.Flat[Char, Letter] =
+    Show.instance(t => s"isLetter('$t')")
+
+  implicit def lowerCaseValidate: Validate.Flat[Char, LowerCase] =
+    Validate.fromPredicate(_.isLower, LowerCase())
+
+  implicit def lowerCaseShow: Show.Flat[Char, LowerCase] =
+    Show.instance(t => s"isLower('$t')")
+
+  implicit def upperCaseValidate: Validate.Flat[Char, UpperCase] =
+    Validate.fromPredicate(_.isUpper, UpperCase())
+
+  implicit def upperCaseShow: Show.Flat[Char, UpperCase] =
+    Show.instance(t => s"isUpper('$t')")
+
+  implicit def whitespaceValidate: Validate.Flat[Char, Whitespace] =
+    Validate.fromPredicate(_.isWhitespace, Whitespace())
+
+  implicit def whitespaceShow: Show.Flat[Char, Whitespace] =
+    Show.instance(t => s"isWhitespace('$t')")
 }

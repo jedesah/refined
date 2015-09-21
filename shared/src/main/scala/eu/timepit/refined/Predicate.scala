@@ -1,5 +1,7 @@
 package eu.timepit.refined
 
+import eu.timepit.refined.api.{Show, Validate}
+
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -97,4 +99,7 @@ object Predicate {
   /** Returns a [[Predicate]] that ignores its inputs and always yields `false`. */
   def alwaysInvalid[P, T]: Predicate[P, T] =
     constant(isValidV = false, "false")
+
+  implicit def fromValidateAndShow[P, T, R](implicit v: Validate.Aux[T, P, R], s: Show.Aux[T, P, R]): Predicate[P, T] =
+    instance(t => v.validate(t).isPassed, s.showExpr)
 }

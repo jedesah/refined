@@ -1,9 +1,10 @@
 package eu.timepit.refined
 
+import eu.timepit.refined.api.{Show, Validate}
 import eu.timepit.refined.boolean.Or
 import eu.timepit.refined.char._
 
-object char extends CharPredicates {
+object char extends CharPredicates with CharInstances {
 
   /** Predicate that checks if a `Char` is a digit. */
   case class Digit()
@@ -26,9 +27,6 @@ object char extends CharPredicates {
 
 private[refined] trait CharPredicates {
 
-  implicit def digitPredicate: Predicate[Digit, Char] =
-    Predicate.instance(_.isDigit, t => s"isDigit('$t')")
-
   implicit def letterPredicate: Predicate[Letter, Char] =
     Predicate.instance(_.isLetter, t => s"isLetter('$t')")
 
@@ -40,4 +38,13 @@ private[refined] trait CharPredicates {
 
   implicit def whitespacePredicate: Predicate[Whitespace, Char] =
     Predicate.instance(_.isWhitespace, t => s"isWhitespace('$t')")
+}
+
+private[refined] trait CharInstances {
+
+  implicit def digitValidate: Validate.Flat[Char, Digit] =
+    Validate.fromPredicate(_.isDigit, Digit())
+
+  implicit def digitShow: Show.Flat[Char, Digit] =
+    Show.instance(t => s"isDigit('$t')")
 }

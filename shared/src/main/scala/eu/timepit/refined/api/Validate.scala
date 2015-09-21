@@ -24,6 +24,18 @@ object Validate {
       override def validate(t: T): Res = f(t)
     }
 
+  /**
+   * Constructs a [[Validate]] from the predicate `f`. All values of type `T`
+   * for which `f` returns `true` are considered valid according to `P`.
+   */
   def fromPredicate[T, P](f: T => Boolean, p: P): Flat[T, P] =
     instance(t => Result.fromBoolean(f(t), p))
+
+  /**
+   * Constructs a [[Validate]] from the partial function `pf`. All values of
+   * type `T` for which `pf` does not throw an exception are considered valid
+   * according to `P`.
+   */
+  def fromPartial[T, U, P](pf: T => U, p: P): Flat[T, P] =
+    fromPredicate(t => scala.util.Try(pf(t)).isSuccess, p)
 }

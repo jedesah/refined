@@ -1,5 +1,7 @@
 package eu.timepit.refined.api
 
+import scala.util.{Failure, Success, Try}
+
 trait Show[T, P] extends Serializable {
 
   type R
@@ -7,6 +9,9 @@ trait Show[T, P] extends Serializable {
   final type Res = Result[R]
 
   def showExpr(t: T): String
+
+  def showResult(t: T, r: Res): String =
+    s"Predicate ${r.morph("passed", "failed")}: ${showExpr(t)}."
 }
 
 object Show {
@@ -21,5 +26,18 @@ object Show {
     new Show[T, P] {
       override type R = R0
       override def showExpr(t: T): String = f(t)
+    }
+
+  def fromPartial[T, U, P](pf: T => U, name: String): Show.Flat[T, P] =
+    new Show[T, P] {
+      override type R = P
+      override def showExpr(t: T): String = s"""isValid$name("$t")"""
+
+      override def showResult(t: T, r: Res): String =
+        Try(pf(t)) match {
+          case Success(_) => s"$name predicate passed."
+          case Failure(e) => s"$name predicate failed: " + e.getMessage
+        }
+
     }
 }

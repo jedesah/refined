@@ -1,6 +1,6 @@
 package eu.timepit.refined
 
-import eu.timepit.refined.api.{Show, Validate}
+import eu.timepit.refined.api.{Passed, Show, Validate}
 
 import scala.util.{Failure, Success, Try}
 
@@ -101,5 +101,14 @@ object Predicate {
     constant(isValidV = false, "false")
 
   implicit def fromValidateAndShow[P, T, R](implicit v: Validate.Aux[T, P, R], s: Show.Aux[T, P, R]): Predicate[P, T] =
-    instance(t => v.validate(t).isPassed, s.showExpr)
+    new Predicate[P, T] {
+      override def isValid(t: T): Boolean = v.validate(t).isPassed
+
+      override def show(t: T): String = s.showExpr(t)
+
+      override def validate(t: T): Option[String] = {
+        val r = v.validate(t)
+        r.morph(None, Some(s.showResult(t, r)))
+      }
+    }
 }

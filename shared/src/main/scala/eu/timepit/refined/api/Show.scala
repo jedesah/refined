@@ -22,13 +22,13 @@ object Show {
 
   def apply[T, P](implicit s: Show[T, P]): Aux[T, P, s.R] = s
 
-  def instance[T, P, R0](f: T => String): Show.Aux[T, P, R0] =
+  def instance[T, P, R0](f: T => String): Aux[T, P, R0] =
     new Show[T, P] {
       override type R = R0
       override def showExpr(t: T): String = f(t)
     }
 
-  def fromPartial[T, U, P](pf: T => U, name: String): Show.Flat[T, P] =
+  def fromPartial[T, U, P](pf: T => U, name: String): Flat[T, P] =
     new Show[T, P] {
       override type R = P
       override def showExpr(t: T): String = s"""isValid$name("$t")"""

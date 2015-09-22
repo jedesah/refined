@@ -1,8 +1,8 @@
 package eu.timepit.refined
 
 import eu.timepit.refined.InferenceRule.==>
+import eu.timepit.refined.api.{Show, Validate}
 import eu.timepit.refined.boolean._
-import eu.timepit.refined.generic.Equal
 import eu.timepit.refined.numeric._
 import shapeless.nat._
 import shapeless.ops.nat.ToInt
@@ -27,7 +27,7 @@ import shapeless.{Nat, Witness}
  * res2: Double @@ Greater[W.`1.5`.T] = 1.6
  * }}}
  */
-object numeric extends NumericPredicates with NumericInferenceRules {
+object numeric extends NumericInstances with NumericInferenceRules {
 
   /** Predicate that checks if a numeric value is less than `N`. */
   case class Less[N](n: N)
@@ -57,22 +57,31 @@ object numeric extends NumericPredicates with NumericInferenceRules {
   type Interval[L, H] = GreaterEqual[L] And LessEqual[H]
 }
 
-private[refined] trait NumericPredicates {
+private[refined] trait NumericInstances {
 
-  implicit def lessPredicate[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Predicate[Less[N], T] =
-    Predicate.instance(t => nt.lt(t, wn.value), t => s"($t < ${wn.value})")
+  implicit def lessValidate[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Validate.Flat[T, Less[N]] =
+    Validate.fromPredicate(t => nt.lt(t, wn.value), Less(wn.value))
 
-  implicit def greaterPredicate[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Predicate[Greater[N], T] =
-    Predicate.instance(t => nt.gt(t, wn.value), t => s"($t > ${wn.value})")
+  implicit def lessShow[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Show.Flat[T, Less[N]] =
+    Show.instance(t => s"($t < ${wn.value})")
 
-  implicit def lessPredicateNat[N <: Nat, T](implicit tn: ToInt[N], nt: Numeric[T]): Predicate[Less[N], T] =
-    Predicate.instance(t => nt.toDouble(t) < tn(), t => s"($t < ${tn()})")
+  implicit def greaterValidate[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Validate.Flat[T, Greater[N]] =
+    Validate.fromPredicate(t => nt.gt(t, wn.value), Greater(wn.value))
 
-  implicit def greaterPredicateNat[N <: Nat, T](implicit tn: ToInt[N], nt: Numeric[T]): Predicate[Greater[N], T] =
-    Predicate.instance(t => nt.toDouble(t) > tn(), t => s"($t > ${tn()})")
+  implicit def greaterShow[T, N <: T](implicit wn: Witness.Aux[N], nt: Numeric[T]): Show.Flat[T, Greater[N]] =
+    Show.instance(t => s"($t > ${wn.value})")
 
-  implicit def equalPredicateNat[N <: Nat, T](implicit tn: ToInt[N], nt: Numeric[T]): Predicate[Equal[N], T] =
-    Predicate.instance(t => nt.toDouble(t) == tn(), t => s"($t == ${tn()})")
+  implicit def lessValidateNat[T, N <: Nat](implicit tn: ToInt[N], wn: Witness.Aux[N], nt: Numeric[T]): Validate.Flat[T, Less[N]] =
+    Validate.fromPredicate(t => nt.toDouble(t) < tn(), Less(wn.value))
+
+  implicit def lessShowNat[T, N <: Nat](implicit tn: ToInt[N]): Show.Flat[T, Less[N]] =
+    Show.instance(t => s"($t < ${tn()})")
+
+  implicit def greaterValidateNat[T, N <: Nat](implicit tn: ToInt[N], wn: Witness.Aux[N], nt: Numeric[T]): Validate.Flat[T, Greater[N]] =
+    Validate.fromPredicate(t => nt.toDouble(t) > tn(), Greater(wn.value))
+
+  implicit def greaterShowNat[T, N <: Nat](implicit tn: ToInt[N]): Show.Flat[T, Greater[N]] =
+    Show.instance(t => s"($t > ${tn()})")
 }
 
 private[refined] trait NumericInferenceRules {
@@ -94,7 +103,4 @@ private[refined] trait NumericInferenceRules {
 
   implicit def greaterInferenceWitNat[C, A <: C, B <: Nat](implicit wa: Witness.Aux[A], tb: ToInt[B], nc: Numeric[C]): Greater[A] ==> Greater[B] =
     InferenceRule(nc.gt(wa.value, nc.fromInt(tb())), s"greaterInferenceWitNat(${wa.value}, ${tb()})")
-
-  implicit def equalPredicateInferenceNat[P, T, N <: Nat](implicit p: Predicate[P, T], nt: Numeric[T], tn: ToInt[N]): Equal[N] ==> P =
-    InferenceRule(p.isValid(nt.fromInt(tn())), s"equalPredicateInferenceNat(${p.show(nt.fromInt(tn()))})")
 }

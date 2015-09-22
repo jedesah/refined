@@ -15,9 +15,6 @@ sealed abstract class Result[A] extends Product with Serializable {
 
   def isPassed: Boolean =
     morph(true, false)
-
-  def isFailed: Boolean =
-    morph(false, true)
 }
 
 final case class Passed[A](detail: A) extends Result[A]

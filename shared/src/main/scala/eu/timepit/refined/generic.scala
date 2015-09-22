@@ -2,10 +2,11 @@ package eu.timepit.refined
 
 import eu.timepit.refined.InferenceRule.==>
 import eu.timepit.refined.generic._
+import shapeless._
 import shapeless.ops.coproduct.ToHList
 import shapeless.ops.hlist.ToList
+import shapeless.ops.nat.ToInt
 import shapeless.ops.record.Keys
-import shapeless.{Coproduct, HList, LabelledGeneric, Witness}
 
 object generic extends GenericPredicates with GenericInferenceRules {
 
@@ -29,6 +30,9 @@ private[refined] trait GenericPredicates {
 
   implicit def equalPredicate[T, U <: T](implicit wu: Witness.Aux[U]): Predicate[Equal[U], T] =
     Predicate.instance(_ == wu.value, t => s"($t == ${wu.value})")
+
+  implicit def equalPredicateNat[N <: Nat, T](implicit tn: ToInt[N], nt: Numeric[T]): Predicate[Equal[N], T] =
+    Predicate.instance(t => nt.toDouble(t) == tn(), t => s"($t == ${tn()})")
 
   implicit def ctorNamesPredicate[T, P, R0 <: Coproduct, R1 <: HList, K <: HList](
     implicit
@@ -66,4 +70,7 @@ private[refined] trait GenericInferenceRules {
 
   implicit def equalPredicateInference[T, U <: T, P](implicit p: Predicate[P, T], wu: Witness.Aux[U]): Equal[U] ==> P =
     InferenceRule(p.isValid(wu.value), s"equalPredicateInference(${p.show(wu.value)})")
+
+  implicit def equalPredicateInferenceNat[P, T, N <: Nat](implicit p: Predicate[P, T], nt: Numeric[T], tn: ToInt[N]): Equal[N] ==> P =
+    InferenceRule(p.isValid(nt.fromInt(tn())), s"equalPredicateInferenceNat(${p.show(nt.fromInt(tn()))})")
 }

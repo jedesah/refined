@@ -1,3 +1,4 @@
 ### Changes
 
+* Update to shapeless 2.3.0
 * Update `refined-scalaz` to Scalaz 7.2.0
